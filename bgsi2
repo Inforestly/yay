@@ -1,0 +1,158 @@
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+
+-- Remote
+local remote = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event")
+local player = Players.LocalPlayer
+
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ClawAutoGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 90)
+mainFrame.Position = UDim2.new(0.5, -110, 0.2, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = ScreenGui
+
+-- Add rounded corners
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
+
+-- Add gradient to frame background
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 50, 50)), ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 70, 70))})
+gradient.Rotation = 45
+gradient.Parent = mainFrame
+
+-- Draggable functionality
+local dragInput, dragStart, startPos
+
+local function updatePosition(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+local function onInputBegan(input, gameProcessed)
+    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragInput = nil
+            end
+        end)
+        dragInput = input
+    end
+end
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragInput then
+        updatePosition(input)
+    end
+end)
+
+UserInputService.InputBegan:Connect(onInputBegan)
+
+-- Toggle button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0.8, 0, 0, 30)
+toggleButton.Position = UDim2.new(0.1, 0, 0.25, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 20
+toggleButton.Text = "Start Auto Claw"
+toggleButton.Parent = mainFrame
+
+-- Add rounded corners to the button
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 8)
+buttonCorner.Parent = toggleButton
+
+-- Status label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0, 20)
+statusLabel.Position = UDim2.new(0, 0, 0.75, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextSize = 16
+statusLabel.Text = "Status: Idle"
+statusLabel.Parent = mainFrame
+
+local running = false
+local uiVisible = true
+
+local function toggleAuto()
+    running = not running
+    toggleButton.Text = running and "Stop Auto Claw" or "Start Auto Claw"
+    statusLabel.Text = running and "Status: Running..." or "Status: Idle"
+end
+
+toggleButton.MouseButton1Click:Connect(toggleAuto)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
+        uiVisible = not uiVisible
+        mainFrame.Visible = uiVisible
+    end
+end)
+
+-- Automation Loop
+task.spawn(function()
+    while true do
+        if running then
+            remote:FireServer("SkipMinigameCooldown", "Robot Claw")
+            task.wait(0.01)
+
+            remote:FireServer("StartMinigame", "Robot Claw", "Insane")
+            task.wait(1.25)
+
+            print("[AutoCollect] Minigame started. Scanning for items...")
+
+            local startTime = tick()
+            local seenGuids = {}
+            local gui = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+
+            while tick() - startTime < 1.35 do
+                for _, item in ipairs(gui:GetChildren()) do
+                    if item:IsA("BillboardGui") and item.Name:match("^ClawItem") then
+                        local guid = item.Name:sub(9)
+                        if not seenGuids[guid] then
+                            seenGuids[guid] = true
+                            print("[AutoCollect] Grabbing item:", guid)
+
+                            local success, err = pcall(function()
+                                remote:FireServer("GrabMinigameItem", guid)
+                            end)
+
+                            if not success then
+                                warn("[AutoCollect] Failed to grab item:", err)
+                            end
+
+                            task.wait(0.01)
+                        end
+                    end
+                end
+                task.wait(0.01)
+            end
+
+            remote:FireServer("FinishMinigame")
+            print("[AutoCollect] Minigame finished.")
+            task.wait(1.35)
+        else
+            task.wait(1.25)
+        end
+    end
+end)
+
+print("Init - Claw UI")
