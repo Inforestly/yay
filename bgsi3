@@ -1,0 +1,155 @@
+local RS = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+
+local sh = RS:WaitForChild("Shared")
+local fw = sh:WaitForChild("Framework")
+local net = fw:WaitForChild("Network")
+local rem = net:WaitForChild("Remote")
+
+local diceName = "Giant Dice"
+local enabled = false
+local diceOptions = {"Golden Dice", "Giant Dice", "Dice"}
+
+-- UI Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Dice"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game:GetService("CoreGui")
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 300, 0, 240)
+main.Position = UDim2.new(0.5, -150, 0.5, -120)
+main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+main.BorderSizePixel = 0
+main.BackgroundTransparency = 0
+main.AnchorPoint = Vector2.new(0.5, 0.5)
+main.ClipsDescendants = true
+main.Parent = ScreenGui
+
+main.Active = true
+main.Draggable = true
+
+local UICorner = Instance.new("UICorner", main)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.Text = "🎲 Dice Roller"
+title.TextSize = 20
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Dropdown button
+local dropdownBtn = Instance.new("TextButton", main)
+dropdownBtn.Size = UDim2.new(1, -20, 0, 30)
+dropdownBtn.Position = UDim2.new(0, 10, 0, 40)
+dropdownBtn.Text = "🎲 Selected: None"
+dropdownBtn.Font = Enum.Font.GothamBold
+dropdownBtn.TextSize = 16
+dropdownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+dropdownBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+dropdownBtn.BorderSizePixel = 0
+
+local dropdownCorner = Instance.new("UICorner", dropdownBtn)
+dropdownCorner.CornerRadius = UDim.new(0, 8)
+
+-- Dropdown frame (collapsible)
+local dropdownFrame = Instance.new("Frame", main)
+dropdownFrame.Position = UDim2.new(0, 10, 0, 75)
+dropdownFrame.Size = UDim2.new(1, -20, 0, 0)
+dropdownFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+dropdownFrame.BorderSizePixel = 0
+dropdownFrame.ClipsDescendants = true
+
+local dropdownFrameCorner = Instance.new("UICorner", dropdownFrame)
+dropdownFrameCorner.CornerRadius = UDim.new(0, 8)
+
+local dropdownOpen = false
+local optionHeight = 30
+local fullHeight = #diceOptions * optionHeight
+
+-- Create dropdown options
+for i, optionName in ipairs(diceOptions) do
+	local option = Instance.new("TextButton", dropdownFrame)
+	option.Size = UDim2.new(1, 0, 0, optionHeight)
+	option.Position = UDim2.new(0, 0, 0, (i - 1) * optionHeight)
+	option.Text = optionName
+	option.Font = Enum.Font.GothamBold
+	option.TextSize = 18
+	option.TextColor3 = Color3.fromRGB(255, 255, 255)
+	option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    option.BackgroundTransparency = 1
+	option.BorderSizePixel = 0
+	
+	local optionCorner = Instance.new("UICorner", option)
+	optionCorner.CornerRadius = UDim.new(0, 6)
+
+	option.MouseButton1Click:Connect(function()
+		diceName = optionName
+		dropdownBtn.Text = "🎲 Selected: " .. optionName
+		dropdownOpen = false
+		TweenService:Create(dropdownFrame, TweenInfo.new(0.25), {
+			Size = UDim2.new(1, -20, 0, 0)
+		}):Play()
+	end)
+end
+
+-- Animate dropdown toggle
+dropdownBtn.MouseButton1Click:Connect(function()
+	dropdownOpen = not dropdownOpen
+	local targetHeight = dropdownOpen and fullHeight or 0
+	TweenService:Create(dropdownFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = UDim2.new(1, -20, 0, targetHeight)
+	}):Play()
+end)
+
+-- Toggle button
+local toggle = Instance.new("TextButton", main)
+toggle.Size = UDim2.new(1, -20, 0, 40)
+toggle.Position = UDim2.new(0, 10, 0, 85 + fullHeight)
+toggle.Text = "🔴 Disabled"
+toggle.Font = Enum.Font.GothamBold
+toggle.TextSize = 18
+toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggle.TextColor3 = Color3.fromRGB(255, 80, 80)
+toggle.BorderSizePixel = 0
+
+local toggleCorner = Instance.new("UICorner", toggle)
+toggleCorner.CornerRadius = UDim.new(0, 8)
+
+toggle.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	if enabled then
+		toggle.Text = "🟢 Enabled"
+		toggle.TextColor3 = Color3.fromRGB(80, 255, 80)
+	else
+		toggle.Text = "🔴 Disabled"
+		toggle.TextColor3 = Color3.fromRGB(255, 80, 80)
+	end
+end)
+
+
+-- Automation loop
+task.spawn(function()
+	while true do
+		if enabled and diceName ~= "" then
+			pcall(function()
+				rem:WaitForChild("Event"):FireServer("ClaimTile")
+				rem:WaitForChild("Function"):InvokeServer("RollDice", diceName)
+			end)
+		end
+		task.wait(0)
+	end
+end)
+
+
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.LeftControl then
+        main.Visible = not main.Visible
+    end
+end)
+
+print("Init - Dice UI v2")
