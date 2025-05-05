@@ -420,10 +420,9 @@ function registersc(category, label, emoji, url)
     end)
 end
 
-registersc("Misc", "Gem Genie Script", "🧞", "https://pastebin.com/raw/cmBsgkm7")
-registersc("Misc", "Competitive Script", "🏆", "https://pastebin.com/raw/SXdaVW40")
-registersc("Misc", "Dice Script", "🎲", "https://pastebin.com/raw/W8JcvSgr")
-registersc("Misc", "Claw Script", "🕹️", "https://pastebin.com/raw/D9PSdtFX")
+registersc("Misc", "Competitive Script", "🏆", "https://raw.githubusercontent.com/Inforestly/yay/refs/heads/main/bgsi4")
+registersc("Misc", "Dice Script", "🎲", "https://raw.githubusercontent.com/Inforestly/yay/refs/heads/main/bgsi3")
+registersc("Misc", "Claw Script", "🕹️", "https://raw.githubusercontent.com/Inforestly/yay/refs/heads/main/bgsi2")
 registersc("Misc", "Infinite Yield", "♾️", "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source")
 
 --== Automation Loops ==--
