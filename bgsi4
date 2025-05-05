@@ -1,0 +1,247 @@
+--// Services
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local GuiService = game:GetService("GuiService")
+
+--// Variables
+local LP = Players.LocalPlayer
+local Rendered = workspace:WaitForChild("Rendered")
+local Eggs = RS:WaitForChild("Assets"):WaitForChild("Eggs")
+local RE = RS:WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event")
+
+local EggName = "Common Egg"
+local stayOnEgg = false
+local AutoHatchEnabled = false
+local printedMessages = {}
+local eggPos = nil 
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game:GetService("CoreGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 175, 0, 75)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0)
+mainFrame.Position = UDim2.new(0.5, 0, 0, 4)
+mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+mainFrame.Parent = screenGui
+
+local mainFrameCorner = Instance.new("UICorner")
+mainFrameCorner.CornerRadius = UDim.new(0, 10)
+mainFrameCorner.Parent = mainFrame
+
+local mainFrameStroke = Instance.new("UIStroke")
+mainFrameStroke.Color = Color3.fromRGB(255, 255, 255)
+mainFrameStroke.Thickness = 2
+mainFrameStroke.Parent = mainFrame
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 120, 0, 50)
+toggleButton.AnchorPoint = Vector2.new(0.5, 0.5)
+toggleButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+toggleButton.Text = "Start Auto Hatch"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.TextScaled = true
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.Parent = mainFrame
+
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0, 8)
+toggleButtonCorner.Parent = toggleButton
+
+toggleButton.MouseButton1Click:Connect(function()
+    AutoHatchEnabled = not AutoHatchEnabled
+    toggleButton.Text = AutoHatchEnabled and "Stop Auto Hatch" or "Start Auto Hatch"
+end)
+
+function printOnce(key, message, isWarning)
+    if not printedMessages[key] then
+        printedMessages[key] = true
+        if isWarning then
+            warn(message)
+        else
+            print(message)
+        end
+    end
+end
+
+function resetPrintOnce(key)
+    printedMessages[key] = nil
+end
+
+function MoveTo(pos)
+    local char = LP.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        local hrp = char.HumanoidRootPart
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+
+            local raisedPos = pos + Vector3.new(0, 5, 0) 
+            hum:MoveTo(raisedPos)
+            
+            hum.MoveToFinished:Wait()
+
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+end
+
+function findEggPos(Egg)
+    for _, chunker in pairs(Rendered:GetChildren()) do
+        if chunker:IsA("Folder") and string.find(chunker.Name, "Chunker") then
+            for _, child in pairs(chunker:GetChildren()) do
+                if (child:IsA("Model") or child:IsA("Folder")) and child.Name ~= "Coming Soon" then
+                    if string.find(child.Name:lower(), Egg:lower()) then
+                        local plate = child:FindFirstChild("Plate")
+                        if plate then
+                            local direction = plate.CFrame.LookVector
+                            local newPosition = plate.Position + direction * 5
+                            return newPosition
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+function teleportToEgg(Egg)
+    local pos = findEggPos(Egg)
+    if pos then
+        MoveTo(pos)
+        EggName = Egg
+        eggPeggPososition = pos
+        resetPrintOnce("EggNotFound")
+    else
+    end
+end
+
+function EnableHatch(Egg)
+    local pos = findEggPos(Egg)
+    if pos then
+        MoveTo(pos)
+        EggName = Egg
+        eggPos = pos
+        
+        task.wait(0.5)
+        AutoHatchEnabled = true
+        toggleButton.Text = "Stop Auto Hatch"
+        resetPrintOnce("EggNotFound")
+    else
+    end
+end
+
+task.spawn(function()
+    while task.wait() do
+        if AutoHatchEnabled and EggName ~= "" then
+            if Eggs:FindFirstChild(EggName) then
+                RE:FireServer("HatchEgg", EggName, 6)
+            end
+        end
+    end
+end)
+
+function checkTasks()
+    local Folder = LP.PlayerGui.ScreenGui.Competitive.Frame.Content.Tasks:GetChildren()
+
+    local TargetEgg = nil
+    for slot, task in ipairs(Folder) do
+        if task:IsA("Frame") then
+            local content = task:FindFirstChild("Content")
+            if content then
+                local typeLabel = content:FindFirstChild("Type")
+                local label = content:FindFirstChild("Label")
+                local barLabel = content:FindFirstChild("Bar") and content.Bar:FindFirstChild("Label")
+
+                if typeLabel and label and typeLabel.Text == "Repeatable" then
+                    local taskText = label.Text
+                    local progressText = barLabel and barLabel.Text or "0%"
+
+                    if string.find(taskText:lower(), "shiny") then
+                        TargetEgg = "Infinity Egg"
+                        break
+                    end
+
+                    if string.find(taskText:lower(), "hatch") and (string.find(taskText:lower(), "legendary") or string.find(taskText:lower(), "epic")) then
+                        TargetEgg = "Spikey Egg"
+                        break
+                    end
+
+                    if slot == 3 or slot == 4 then
+                        if string.find(taskText:lower(), "mythic") then
+                            TargetEgg = "Spikey Egg"
+                            break
+                        end
+                    end
+
+                    if not string.find(progressText, "100") then
+                        local hatchEgg = string.match(taskText, "Hatch%s+%d+%s+(.-)%s+Eggs")
+                        if hatchEgg then
+                            TargetEgg = hatchEgg .. " Egg"
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if stayOnEgg then
+    elseif TargetEgg then
+        if EggName:lower() ~= TargetEgg:lower() then
+            EnableHatch(TargetEgg)
+        end
+    end
+end
+
+function monitor()
+    while task.wait(2) do
+        local char = LP.Character
+        if char and eggPos then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local distance = (hrp.Position - eggPos).Magnitude
+                if distance > 15 then 
+                    teleportToEgg(EggName)
+
+                    if not AutoHatchEnabled then
+                        AutoHatchEnabled = true
+                        toggleButton.Text = "Stop Auto Hatch"
+                    end
+                end
+            end
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    checkTasks()
+end)
+
+task.spawn(monitor)
+
+LP.CharacterAdded:Connect(function(char)
+    char:WaitForChild("HumanoidRootPart", 10)
+    task.wait(0.5)
+    if EggName ~= "" then
+        teleportToEgg(EggName)
+
+        if not AutoHatchEnabled then
+            AutoHatchEnabled = true
+            toggleButton.Text = "Stop Auto Hatch"
+        end
+    end
+end)
+
+teleportToEgg(EggName)
