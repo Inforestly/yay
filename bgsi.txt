@@ -1,0 +1,732 @@
+--== Services ==--
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local WS = game:GetService("Workspace")
+local UIS = game:GetService("UserInputService")
+local vu = game:GetService("VirtualUser")
+local TS = game:GetService("TweenService")
+
+
+--== Remotes ==--
+local RE = RS.Shared.Framework.Network.Remote.Event
+local PR = RS.Remotes.Pickups.CollectPickup
+
+--== GUI Setup ==--
+ function createCorner(radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    return corner
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ScriptHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.Parent = CoreGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 500, 0, 600)
+mainFrame.Position = UDim2.new(0, 50, 0, 50)
+mainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundTransparency = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = ScreenGui
+createCorner(18).Parent = mainFrame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Text = "✨ BGS \226\136\158 | Script Hub | v6.9"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(0, 255, 140)
+title.Parent = mainFrame
+
+-- Tabs
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, 0, 0, 38)
+tabFrame.Position = UDim2.new(0, 0, 0, 50)
+tabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+tabFrame.BackgroundTransparency = 1
+tabFrame.BorderSizePixel = 0
+tabFrame.Parent = mainFrame
+createCorner(10).Parent = tabFrame
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 4)  
+listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center  
+listLayout.VerticalAlignment = Enum.VerticalAlignment.Center 
+listLayout.FillDirection = Enum.FillDirection.Horizontal  
+listLayout.Parent = tabFrame
+
+-- Create Tabs
+ function createTab(name)
+    local tab = Instance.new("TextButton")
+    tab.Size = UDim2.new(0, 110, 1, 0)  
+    tab.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tab.Font = Enum.Font.GothamBold
+    tab.TextSize = 16
+ 
+    tab.Text = name
+    tab.AutoButtonColor = false
+    tab.Parent = tabFrame
+    createCorner(12).Parent = tab
+    return tab
+end
+
+local pages = {}
+ function createPage()
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(0.98, 0, 1, -90)
+    page.Position = UDim2.new(0, 0, 0, 89)
+    page.CanvasSize = UDim2.new(0, 0, 0, 1000)
+    page.ScrollBarThickness = 6
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel = 0
+    page.Visible = false
+    page.Parent = mainFrame
+    return page
+end
+
+-- Tabs and Pages
+pages.Automation = createPage()
+pages.Hatching = createPage()
+pages.Rifts = createPage()
+pages.Misc = createPage()
+
+
+-- Switch to Tab
+ function switchToTab(tabName)
+    for name, page in pairs(pages) do
+        page.Visible = (name == tabName)
+    end
+end
+
+local automationTab = createTab("🚀 Automation")
+automationTab.MouseButton1Click:Connect(function() switchToTab("Automation") end)
+
+local hatchingTab = createTab("🥚 Hatching")
+hatchingTab.MouseButton1Click:Connect(function() switchToTab("Hatching") end)
+
+local miscTab = createTab("⚙️ Misc")
+miscTab.MouseButton1Click:Connect(function() switchToTab("Misc") end)
+
+local riftsTab = createTab("🏝️ Rifts")
+riftsTab.MouseButton1Click:Connect(function() switchToTab("Rifts") end)
+
+-- Set initial tab to "Rifts"
+switchToTab("Rifts")
+
+--== Section Styling ==--
+local yOffsets = { Automation = 5, Hatching = 5, Rifts = 5, Misc = 5 }
+ function addToPage(tabName, element)
+    local page = pages[tabName]
+    element.Position = UDim2.new(0, 35, 0, yOffsets[tabName])
+    element.Parent = page
+    yOffsets[tabName] += element.Size.Y.Offset + 10
+end
+
+ function createSectionTitle(tab, text)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 400, 0, 35)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 20
+    label.TextColor3 = Color3.fromRGB(0, 170, 255)
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    addToPage(tab, label)
+end
+
+function createText(tab, text)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 400, 0, 35)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextScaled = true
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    addToPage(tab, label)
+end
+
+
+
+function credLabel(tab, text)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 400, 0, 35)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(255, 255, 0)
+    label.TextXAlignment = Enum.TextXAlignment.Center
+    addToPage(tab, label)
+end
+
+
+
+ function createToggleButton(tab, name, flagRef)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 400, 0, 40)
+    button.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+    button.TextColor3 = Color3.fromRGB(220, 220, 220)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 17
+    button.Text = name .. ": OFF"
+    button.AutoButtonColor = false
+    createCorner(10).Parent = button
+
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+    end)
+    button.MouseLeave:Connect(function()
+        if not flagRef.state then
+            button.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+        end
+    end)
+
+    button.MouseButton1Click:Connect(function()
+        flagRef.state = not flagRef.state
+        button.Text = name .. ": " .. (flagRef.state and "ON" or "OFF")
+        button.BackgroundColor3 = flagRef.state and Color3.fromRGB(0, 200, 120) or Color3.fromRGB(36, 36, 36)
+    end)
+
+    addToPage(tab, button)
+    return button
+end
+
+
+ function createButton(tab, name, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 400, 0, 40)
+    button.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+    button.TextColor3 = Color3.fromRGB(220, 220, 220)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 17
+    button.Text = name
+    button.AutoButtonColor = false
+    createCorner(10).Parent = button
+
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+    end)
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+    end)
+
+    button.MouseButton1Click:Connect(function()
+        if callback then
+            callback()
+        end
+    end)
+
+    addToPage(tab, button)
+    return button
+end
+
+
+--== State Flags ==--
+local flags = {
+    autoShops = {state = false},
+    autoPickup = {state = false},
+    autoBubble = {state = false},
+    autoChest = {state = false},
+    autoHatch = {state = false},
+    autoMysteryBox = {state = false},
+    autoUseKeys = {state = false},
+}
+
+--== GUI Elements ==--
+createSectionTitle("Automation", "🔹 Automation")
+createText("Automation", "These features do work, just make sure you turn off a few before hatching...")
+createToggleButton("Automation", "Auto Shops", flags.autoShops)
+createToggleButton("Automation", "Auto Pickup", flags.autoPickup)
+createToggleButton("Automation", "Auto Bubble", flags.autoBubble)
+createToggleButton("Automation", "Auto Chests", flags.autoChest)
+createToggleButton("Automation", "Auto Mystery Box", flags.autoMysteryBox)
+createToggleButton("Automation", "Auto Use Keys", flags.autoUseKeys)
+credLabel("Automation", "Made By: Nep")
+
+
+createSectionTitle("Hatching", "🔹 Hatching")
+createSectionTitle("Rifts", "🔹 Rift Teleportation")
+
+local tweendurationbox = Instance.new("TextBox")
+tweendurationbox.Size = UDim2.new(0, 400, 0, 35)
+tweendurationbox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tweendurationbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+tweendurationbox.Text = "25"
+tweendurationbox.Font = Enum.Font.GothamBold
+tweendurationbox.TextSize = 16
+tweendurationbox.TextXAlignment = Enum.TextXAlignment.Center
+createCorner(10).Parent = tweendurationbox
+addToPage("Rifts", tweendurationbox)
+
+
+local eggname = Instance.new("TextBox")
+eggname.Size = UDim2.new(0, 400, 0, 35)
+eggname.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+eggname.TextColor3 = Color3.fromRGB(255, 255, 255)
+eggname.Text = "🥚 egg-name"
+eggname.Font = Enum.Font.GothamBold
+eggname.TextSize = 16
+eggname.TextXAlignment = Enum.TextXAlignment.Center
+createCorner(10).Parent = eggname
+addToPage("Rifts", eggname)
+
+local luckbox = Instance.new("TextBox")
+luckbox.Size = UDim2.new(0, 400, 0, 35)
+luckbox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+luckbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+luckbox.Text = "Luck Multi [x5,10,25]"
+luckbox.Font = Enum.Font.GothamBold
+luckbox.TextSize = 16
+luckbox.TextXAlignment = Enum.TextXAlignment.Center
+createCorner(10).Parent = luckbox
+addToPage("Rifts", luckbox)
+
+
+
+local teleportBtn = createButton("Rifts", "🚀 Teleport To Rift")
+
+local eggBox = Instance.new("TextBox")
+eggBox.Size = UDim2.new(0, 400, 0, 35)
+eggBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+eggBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+eggBox.Text = "🥚 Egg Name"
+eggBox.Font = Enum.Font.GothamBold
+eggBox.TextSize = 16
+eggBox.TextXAlignment = Enum.TextXAlignment.Center
+createCorner(10).Parent = eggBox
+addToPage("Hatching", eggBox)
+
+createToggleButton("Hatching", "Auto Hatch", flags.autoHatch)
+
+
+createSectionTitle("Misc", "🔹 Miscellaneous")
+    function TeleportDropdown()
+    local dropdownFrame = Instance.new("Frame")
+    dropdownFrame.Size = UDim2.new(0, 400, 0, 40)
+    dropdownFrame.Position = UDim2.new(0, 0, 0, 40) 
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+    dropdownFrame.ZIndex = 1 -- bumped up from default (1) to 3
+
+    createCorner(10).Parent = dropdownFrame
+
+
+    local selected = Instance.new("TextButton")
+    selected.Size = UDim2.new(1, 0, 1, 0)
+    selected.BackgroundTransparency = 1
+    selected.Text = "Select Island"
+    selected.Font = Enum.Font.GothamBold
+    selected.TextSize = 18
+    selected.TextColor3 = Color3.fromRGB(255, 255, 255)
+    selected.Parent = dropdownFrame
+    selected.AutoButtonColor = false
+
+    local listFrame = Instance.new("Frame")
+    listFrame.Size = UDim2.new(0, 400, 0, 0)
+    listFrame.Position = UDim2.new(0, 0, 1.2, 0)
+    listFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    listFrame.Visible = false
+    listFrame.ClipsDescendants = true
+    listFrame.ZIndex = 3 
+
+    createCorner(10).Parent = listFrame
+    listFrame.Parent = dropdownFrame
+
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 6)
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.VerticalAlignment = Enum.VerticalAlignment.Center
+    layout.Parent = listFrame
+
+    local islands = {
+        {Name = "🌍 The Overworld", Path = "Workspace.Worlds.The Overworld.PortalSpawn"},
+        {Name = "Floating Island", Path = "Workspace.Worlds.The Overworld.Islands.Floating Island.Island.Portal.Spawn"},
+        {Name = "Outer Space Island", Path = "Workspace.Worlds.The Overworld.Islands.Outer Space.Island.Portal.Spawn"},
+        {Name = "Twilight Island", Path = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"},
+        {Name = "The Void", Path = "Workspace.Worlds.The Overworld.Islands.The Void.Island.Portal.Spawn"},
+        {Name = "Zen Island", Path = "Workspace.Worlds.The Overworld.Islands.Zen.Island.Portal.Spawn"},
+        {Name = "🎲 Minigame Paradise", Path = "Workspace.Worlds.Minigame Paradise.PortalSpawn"},
+        {Name = "Dice Island", Path = "Workspace.Worlds.Minigame Paradise.Islands.Dice Island.Island.Portal.Spawn"},
+        {Name = "Minecart Forest", Path = "Workspace.Worlds.Minigame Paradise.Islands.Minecart Forest.Island.Portal.Spawn"},
+        {Name = "Robot Factory", Path = "Workspace.Worlds.Minigame Paradise.Islands.Robot Factory.Island.Portal.Spawn"},
+ }
+
+    for _, island in ipairs(islands) do
+        local option = Instance.new("TextButton")
+        option.Size = UDim2.new(0.8, 0, 0, 30)
+        option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        option.TextColor3 = Color3.fromRGB(255, 255, 255)
+        option.Font = Enum.Font.GothamBold
+        option.TextSize = 20
+        option.Text = island.Name
+        option.Parent = listFrame
+        option.AutoButtonColor = false
+        option.ZIndex = 4 
+
+        createCorner(8).Parent = option
+
+        option.MouseEnter:Connect(function()
+            option.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        end)
+
+        option.MouseLeave:Connect(function()
+            option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        end)
+
+        option.MouseButton1Click:Connect(function()
+            selected.Text = "" .. island.Name
+            listFrame.Visible = false
+            listFrame.Size = UDim2.new(0, 400, 0, 0)
+
+            local args = {
+                [1] = "Teleport",
+                [2] = island.Path
+            }
+
+            RE:FireServer(unpack(args))
+        end)
+    end
+
+    selected.MouseButton1Click:Connect(function()
+        listFrame.Visible = not listFrame.Visible
+        if listFrame.Visible then
+            local children = #listFrame:GetChildren() - 1
+            listFrame.Size = UDim2.new(0, 400, 0, children * 34)
+        else
+            listFrame.Size = UDim2.new(0, 400, 0, 0)
+        end
+    end)
+
+    addToPage("Misc", dropdownFrame)
+end
+
+TeleportDropdown()
+
+function registersc(category, label, emoji, url)
+    createButton(category, emoji .. " " .. label, function()
+        loadstring(game:HttpGet(url))()
+    end)
+end
+
+registersc("Misc", "Gem Genie Script", "🧞", "https://pastebin.com/raw/cmBsgkm7")
+registersc("Misc", "Competitive Script", "🏆", "https://pastebin.com/raw/SXdaVW40")
+registersc("Misc", "Dice Script", "🎲", "https://pastebin.com/raw/W8JcvSgr")
+registersc("Misc", "Claw Script", "🕹️", "https://pastebin.com/raw/D9PSdtFX")
+registersc("Misc", "Infinite Yield", "♾️", "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source")
+
+--== Automation Loops ==--
+ function buyFromShop(shopName, itemCount)
+    for i = 1, itemCount do
+        RE:FireServer("BuyShopItem", shopName, i)
+        task.wait(0.01)
+    end
+end
+
+for _, loopData in ipairs({
+{flag = flags.autoShops, func = function() buyFromShop("alien-shop", 3) buyFromShop("shard-shop", 3) buyFromShop("dice-shop", 3) end, waitTime = 0.01},    
+        {flag = flags.autoPickup, func = function()
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for _, Folder in pairs(WS:WaitForChild("Rendered"):GetChildren()) do
+                if Folder.Name == "Chunker" then
+                    for _, Model in pairs(Folder:GetChildren()) do
+                        if Model:IsA("Model") and not string.find(Model.Name, "Coming Soon") then
+                            local pos = Model.PrimaryPart and Model.PrimaryPart.Position
+                            if not pos then
+                                for _, Part in pairs(Model:GetChildren()) do
+                                    if Part:IsA("BasePart") then pos = Part.Position break end
+                                end
+                            end
+                            if pos then
+                                hrp.CFrame = CFrame.new(pos)
+                                PR:FireServer(Model.Name)
+                                task.wait(0.2)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end, waitTime = 1.1},
+    
+    {flag = flags.autoBubble, func = function() RE:FireServer("BlowBubble") end, waitTime = 0},
+    {flag = flags.autoHatch, func = function() RE:FireServer("HatchEgg", eggBox.Text .. " Egg", 6) end, waitTime = 0},
+    {flag = flags.autoChest, func = function()
+        for _, chest in ipairs({"Void Chest", "Giant Chest", "Infinity Chest", "Ticket Chest"}) do
+            RE:FireServer("ClaimChest", chest, true)
+            task.wait(0.01)
+        end
+    end, waitTime = 0.01},
+    {flag = flags.autoMysteryBox, func = function()
+        RE:FireServer("UseGift", "Mystery Box", 10)
+    end, waitTime = 0.3},
+    {flag = flags.autoUseKeys, func = function()
+        RE:FireServer("UnlockRiftChest", "golden-chest")
+        RE:FireServer("UnlockRiftChest", "royal-chest")
+    end, waitTime = 0.01},
+}) do
+    task.spawn(function()
+        while true do
+            if loopData.flag.state then
+                loopData.func()
+            end
+            task.wait(loopData.waitTime)
+        end
+    end)
+end
+
+--== UI SETUP ==--
+local background = Instance.new("Frame")
+background.Size = UDim2.new(0.8, 0, 0.4, 0)
+background.Position = UDim2.new(0.1, 0, 0.1, 0)
+background.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+background.BorderSizePixel = 0
+createCorner(10).Parent = background
+background.ZIndex = 2
+addToPage("Rifts", background)
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(0, 255, 255) 
+stroke.Thickness = 3 
+stroke.Transparency = 0.3 
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = background
+
+
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(0.8, 0, 0.9, 0)
+scrollFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+scrollFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollFrame.ScrollBarThickness = 4
+scrollFrame.ZIndex = 5
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Parent = scrollFrame
+listLayout.Padding = UDim.new(0, 10)
+
+addToPage("Rifts", scrollFrame)
+
+--== UPDATE RIFT LIST ==--
+function updateRiftList()
+    for _, child in ipairs(scrollFrame:GetChildren()) do
+        if not child:IsA("UIListLayout") then
+            child:Destroy()
+        end
+    end
+
+    local riftFolder = Workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
+    local specialRifts = {}
+    local normalRifts = {}
+
+    function normalizeName(name)
+        return name:lower():gsub("%s+", "-")
+    end
+
+    function extractLuck(rift)
+        local display = rift:FindFirstChild("Display")
+        if display then
+            local surfaceGui = display:FindFirstChildWhichIsA("SurfaceGui")
+            local icon = surfaceGui and surfaceGui:FindFirstChild("Icon")
+            local luckLabel = icon and icon:FindFirstChild("Luck")
+            if luckLabel and luckLabel:IsA("TextLabel") then
+                local luckVal = tonumber(luckLabel.Text:match("%d+"))
+                return luckVal or 0
+            end
+        end
+        return 0
+    end
+
+    for _, rift in ipairs(riftFolder:GetChildren()) do
+        if rift:IsA("Model") then
+            local riftNameNormalized = normalizeName(rift.Name)
+            local isSpecial = riftNameNormalized:find("gift") or riftNameNormalized:find("chest") or riftNameNormalized == "bubble-rift" or riftNameNormalized == "dice-rift"
+            local riftData = {instance = rift, luck = extractLuck(rift)}
+            if isSpecial then
+                table.insert(specialRifts, riftData)
+            else
+                table.insert(normalRifts, riftData)
+            end
+        end
+    end
+
+    table.sort(normalRifts, function(a, b) return a.luck > b.luck end)
+    table.sort(specialRifts, function(a, b) return a.luck > b.luck end)
+
+    function addRiftButton(riftData, isSpecial)
+        local rift = riftData.instance
+        local display = rift:FindFirstChild("Display")
+        local luckText, timerText = "", ""
+
+        if display then
+            local surfaceGui = display:FindFirstChildWhichIsA("SurfaceGui")
+            local icon = surfaceGui and surfaceGui:FindFirstChild("Icon")
+            local luckLabel = icon and icon:FindFirstChild("Luck")
+            local timerLabel = surfaceGui and surfaceGui:FindFirstChild("Timer")
+
+            if luckLabel and luckLabel:IsA("TextLabel") then
+                luckText = luckLabel.Text
+            end
+            if timerLabel and timerLabel:IsA("TextLabel") then
+                timerText = timerLabel.Text
+            end
+        end
+
+        -- Create button for each rift
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(1, 0, 0, 22)
+        button.BackgroundTransparency = 1
+        button.TextColor3 = isSpecial and Color3.fromRGB(0,255,255) or Color3.fromRGB(0, 255, 0)
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 18
+        button.TextXAlignment = Enum.TextXAlignment.Center
+        button.Text = string.format("- %s | Luck: %s | %s", rift.Name, luckText, timerText)
+        button.Parent = scrollFrame
+        button.ZIndex = 10
+
+        -- On click, set the values for the luck box and egg name
+        button.MouseButton1Click:Connect(function()
+            if luckbox and eggname then
+                local cleanLuck = tonumber(luckText:match("%d+")) or 0
+                luckbox.Text = "x" .. tostring(cleanLuck)  
+                eggname.Text = normalizeName(rift.Name) -- FIXED: use normalized name for consistent comparison
+            end
+        end)
+    end
+
+    for _, riftData in ipairs(normalRifts) do
+        addRiftButton(riftData, false)
+    end
+
+    if #specialRifts > 0 then
+        local sep = Instance.new("TextLabel")
+        sep.Size = UDim2.new(1, 0, 0, 18)
+        sep.BackgroundTransparency = 1
+        sep.TextColor3 = Color3.fromRGB(255, 255, 255)
+        sep.Font = Enum.Font.GothamBold
+        sep.TextSize = 16
+        sep.TextScaled = true
+        sep.Text = "--- Special Rifts ---"
+        sep.Visible = false
+        sep.TextXAlignment = Enum.TextXAlignment.Center
+        sep.Parent = scrollFrame
+        sep.ZIndex = 5
+
+        for _, riftData in ipairs(specialRifts) do
+            addRiftButton(riftData, true)
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        updateRiftList()
+        task.wait(1)
+    end
+end)
+
+--== TELEPORT LOGIC ==--
+function tweenPos(pos)
+	local character = LP.Character
+	if character and character:FindFirstChild("HumanoidRootPart") then
+		local hrp = character.HumanoidRootPart
+		local hum = character:FindFirstChild("Humanoid")
+		if hum then
+			hum:ChangeState(Enum.HumanoidStateType.Physics)
+			hum.PlatformStand = true
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then part.CanCollide = false end
+			end
+
+			local duration = math.clamp(tonumber(tweendurationbox.Text) or 25, 1, 60)
+			local tween = TS:Create(hrp, TweenInfo.new(duration), {CFrame = CFrame.new(pos)})
+			tween:Play()
+			tween.Completed:Wait()
+
+			task.wait(0.1)
+			hum.PlatformStand = false
+			hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then part.CanCollide = true end
+			end
+		end
+	end
+end
+
+function teleportToRiftByLuck()
+	local riftFolder = Workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
+	local targetLuck = luckbox.Text
+	local targetName = eggname.Text -- already normalized
+
+	local function normalizeName(name)
+		return name:lower():gsub("%s+", "-")
+	end
+
+	local function isRiftExpired(display)
+		local timerLabel = display:FindFirstChildWhichIsA("SurfaceGui") and display.SurfaceGui:FindFirstChild("Timer")
+		if timerLabel and timerLabel:IsA("TextLabel") then
+			local text = timerLabel.Text
+			return text:lower():find("0s") or text == "" or text:lower():find("expired")
+		end
+		return true
+	end
+
+	local bestMatch = nil
+
+	for _, rift in ipairs(riftFolder:GetChildren()) do
+		if not rift:IsA("Model") then continue end
+
+		local normalized = normalizeName(rift.Name)
+		if normalized ~= targetName then continue end
+
+		local display = rift:FindFirstChild("Display")
+		if not display then continue end
+
+		local expired = isRiftExpired(display)
+		if not expired then
+			bestMatch = rift
+			break
+		elseif not bestMatch then
+			bestMatch = rift -- fallback to expired if no active found
+		end
+	end
+
+	if not bestMatch then
+		warn("No matching rift found with name: " .. targetName)
+		return
+	end
+
+	local targetPos = bestMatch:FindFirstChild("Display") and bestMatch.Display.Position + Vector3.new(0, 5, 0)
+	if targetPos then
+		tweenPos(targetPos)
+	end
+end
+teleportBtn.MouseButton1Click:Connect(teleportToRiftByLuck)
+
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.LeftControl then
+        mainFrame.Visible = not mainFrame.Visible
+    end
+end)
+
+LP.Idled:Connect(function()
+    vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    task.wait(0.5)
+    vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+end)
+
+print("Initialized & Loaded - v6")
