@@ -40,10 +40,10 @@ createCorner(18).Parent = mainFrame
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.BackgroundTransparency = 1
-title.Text = "✨ BGS \226\136\158 | Script Hub | v7"
+title.Text = "✨ BGS \226\136\158 | Hub v7.1"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.TextColor3 = Color3.fromRGB(0, 255, 140)
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(0, 190, 160)
 title.Parent = mainFrame
 
 -- Tabs
@@ -496,26 +496,12 @@ background.ZIndex = 2
 addToPage("Rifts", background)
 
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(0, 255, 255)
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.Thickness = 3
 stroke.Transparency = 0.3
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = background
 
-local RunService = game:GetService("RunService")
-local hue = 0
-
-RunService.RenderStepped:Connect(function()
-	hue = (hue + 1) % 360
-	
-	-- Skip over bad hue ranges (like brownish/poopy greens)
-	local skipBadHue = (hue >= 30 and hue <= 80) -- typical brown/yellow-green range
-	if skipBadHue then
-		hue = 81
-	end
-
-	stroke.Color = Color3.fromHSV(hue / 360, 1, 1)
-end)
 
 
 local scrollFrame = Instance.new("ScrollingFrame")
@@ -599,35 +585,26 @@ function updateRiftList()
             end
         end
 
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(1, 0, 0, 20)
-button.BackgroundTransparency = 1
-button.Font = Enum.Font.GothamBold
-button.TextSize = 16
-button.TextXAlignment = Enum.TextXAlignment.Center
-button.Text = string.format("- %s | Luck: %s | %s", rift.Name, luckText, timerText)
-button.Parent = scrollFrame
-button.ZIndex = 10
+      local button = Instance.new("TextButton")
+        button.Size = UDim2.new(1, 0, 0, 20)
+        button.BackgroundTransparency = 1
+        button.TextColor3 = isSpecial and Color3.fromRGB(180, 100, 255) or Color3.fromRGB(0, 255, 0)
+        button.Font = Enum.Font.GothamBold
+        button.TextSize = 16
+        button.TextXAlignment = Enum.TextXAlignment.Center
+        button.Text = string.format("- %s | Luck: %s | %s", rift.Name, luckText, timerText)
+        button.Parent = scrollFrame
+        button.ZIndex = 10
 
-if isSpecial then
-    button.TextColor3 = Color3.fromRGB(170, 0, 255)
-
-    local pulseInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
-    local colorTween = TweenService:Create(button, pulseInfo, {
-        TextColor3 = Color3.fromRGB(255, 0, 255)
-    })
-    colorTween:Play()
-else
-    button.TextColor3 = Color3.fromRGB(0, 255, 0)
-end
-
-button.MouseButton1Click:Connect(function()
-    if luckbox and eggname then
-        local cleanLuck = tonumber(luckText:match("%d+")) or 0
-        luckbox.Text = "x" .. tostring(cleanLuck)  
-        eggname.Text = normalizeName(rift.Name)
+        button.MouseButton1Click:Connect(function()
+            if luckbox and eggname then
+                local cleanLuck = tonumber(luckText:match("%d+")) or 0
+                luckbox.Text = "x" .. tostring(cleanLuck)  
+                eggname.Text = normalizeName(rift.Name) 
+            end
+        end)
     end
-end)
+
     for _, riftData in ipairs(normalRifts) do
         addRiftButton(riftData, false)
     end
@@ -721,12 +698,11 @@ function teleportToRiftByLuck()
 			bestMatch = rift
 			break
 		elseif not bestMatch then
-			bestMatch = rift -- fallback to expired if no active found
+			bestMatch = rift 
 		end
 	end
 
 	if not bestMatch then
-		--warn("No matching rift found with name: " .. targetName)
 		return
 	end
 
@@ -749,4 +725,4 @@ LP.Idled:Connect(function()
     vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 end)
 
-print("Initialized & Loaded - v7")
+print("Initialized & Loaded - v7.1")
