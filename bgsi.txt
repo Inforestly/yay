@@ -470,7 +470,7 @@ for _, loopData in ipairs({
     end, waitTime = 0.01},
     {flag = flags.autoMysteryBox, func = function()
         RE:FireServer("UseGift", "Mystery Box", 10)
-    end, waitTime = 0.3},
+    end, waitTime = 0.45},
     {flag = flags.autoUseKeys, func = function()
         RE:FireServer("UnlockRiftChest", "golden-chest")
         RE:FireServer("UnlockRiftChest", "royal-chest")
@@ -587,11 +587,11 @@ function updateRiftList()
 
         -- Create button for each rift
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(1, 0, 0, 22)
+        button.Size = UDim2.new(1, 0, 0, 20)
         button.BackgroundTransparency = 1
         button.TextColor3 = isSpecial and Color3.fromRGB(0,255,255) or Color3.fromRGB(0, 255, 0)
         button.Font = Enum.Font.GothamBold
-        button.TextSize = 18
+        button.TextSize = 16
         button.TextXAlignment = Enum.TextXAlignment.Center
         button.Text = string.format("- %s | Luck: %s | %s", rift.Name, luckText, timerText)
         button.Parent = scrollFrame
@@ -728,4 +728,4 @@ LP.Idled:Connect(function()
     vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 end)
 
-print("Initialized & Loaded - v6")
+print("Initialized & Loaded - v6.1")
