@@ -29,7 +29,7 @@ ScreenGui.Parent = CoreGui
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 500, 0, 600)
 mainFrame.Position = UDim2.new(0, 50, 0, 50)
-mainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 0
 mainFrame.BackgroundTransparency = 0
 mainFrame.Active = true
@@ -40,7 +40,7 @@ createCorner(18).Parent = mainFrame
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.BackgroundTransparency = 1
-title.Text = "✨ BGS \226\136\158 | Script Hub | v6.9"
+title.Text = "✨ BGS \226\136\158 | Script Hub | v7"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 title.TextColor3 = Color3.fromRGB(0, 255, 140)
@@ -705,7 +705,7 @@ function teleportToRiftByLuck()
 	end
 
 	if not bestMatch then
-		warn("No matching rift found with name: " .. targetName)
+		--warn("No matching rift found with name: " .. targetName)
 		return
 	end
 
@@ -728,4 +728,4 @@ LP.Idled:Connect(function()
     vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 end)
 
-print("Initialized & Loaded - v6.1")
+print("Initialized & Loaded - v7")
