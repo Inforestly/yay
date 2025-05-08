@@ -1,4 +1,3 @@
---== Services ==--
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
@@ -9,11 +8,9 @@ local vu = game:GetService("VirtualUser")
 local TS = game:GetService("TweenService")
 
 
---== Remotes ==--
 local RE = RS.Shared.Framework.Network.Remote.Event
 local PR = RS.Remotes.Pickups.CollectPickup
 
---== GUI Setup ==--
  function createCorner(radius)
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, radius)
@@ -35,7 +32,7 @@ mainFrame.BackgroundTransparency = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = ScreenGui
-createCorner(18).Parent = mainFrame
+createCorner(12).Parent = mainFrame
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
@@ -46,7 +43,6 @@ title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(0, 190, 160)
 title.Parent = mainFrame
 
--- Tabs
 local tabFrame = Instance.new("Frame")
 tabFrame.Size = UDim2.new(1, 0, 0, 38)
 tabFrame.Position = UDim2.new(0, 0, 0, 50)
@@ -54,7 +50,7 @@ tabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 tabFrame.BackgroundTransparency = 1
 tabFrame.BorderSizePixel = 0
 tabFrame.Parent = mainFrame
-createCorner(10).Parent = tabFrame
+createCorner(8).Parent = tabFrame
 
 local listLayout = Instance.new("UIListLayout")
 listLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -64,7 +60,6 @@ listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 listLayout.FillDirection = Enum.FillDirection.Horizontal  
 listLayout.Parent = tabFrame
 
--- Create Tabs
  function createTab(name)
     local tab = Instance.new("TextButton")
     tab.Size = UDim2.new(0, 110, 1, 0)  
@@ -76,7 +71,7 @@ listLayout.Parent = tabFrame
     tab.Text = name
     tab.AutoButtonColor = false
     tab.Parent = tabFrame
-    createCorner(12).Parent = tab
+    createCorner(8).Parent = tab
     return tab
 end
 
@@ -94,14 +89,12 @@ local pages = {}
     return page
 end
 
--- Tabs and Pages
 pages.Automation = createPage()
 pages.Hatching = createPage()
 pages.Rifts = createPage()
 pages.Misc = createPage()
 
 
--- Switch to Tab
  function switchToTab(tabName)
     for name, page in pairs(pages) do
         page.Visible = (name == tabName)
@@ -120,10 +113,8 @@ miscTab.MouseButton1Click:Connect(function() switchToTab("Misc") end)
 local riftsTab = createTab("🏝️ Rifts")
 riftsTab.MouseButton1Click:Connect(function() switchToTab("Rifts") end)
 
--- Set initial tab to "Rifts"
-switchToTab("Rifts")
+switchToTab("Automation")
 
---== Section Styling ==--
 local yOffsets = { Automation = 5, Hatching = 5, Rifts = 5, Misc = 5 }
  function addToPage(tabName, element)
     local page = pages[tabName]
@@ -139,7 +130,7 @@ end
     label.Text = text
     label.Font = Enum.Font.GothamBold
     label.TextSize = 20
-    label.TextColor3 = Color3.fromRGB(0, 180, 255)
+    label.TextColor3 = Color3.fromRGB(0, 170, 255)
     label.TextXAlignment = Enum.TextXAlignment.Center
     addToPage(tab, label)
 end
@@ -150,7 +141,7 @@ function createText(tab, text)
     label.BackgroundTransparency = 1
     label.Text = text
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 17
+    label.TextSize = 18
     label.TextScaled = true
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextXAlignment = Enum.TextXAlignment.Center
@@ -182,7 +173,7 @@ end
     button.TextSize = 17
     button.Text = name .. ": OFF"
     button.AutoButtonColor = false
-    createCorner(10).Parent = button
+    createCorner(8).Parent = button
 
     button.MouseEnter:Connect(function()
         button.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
@@ -232,8 +223,6 @@ end
     return button
 end
 
-
---== State Flags ==--
 local flags = {
     autoShops = {state = false},
     autoPickup = {state = false},
@@ -244,7 +233,6 @@ local flags = {
     autoUseKeys = {state = false},
 }
 
---== GUI Elements ==--
 createSectionTitle("Automation", "🔹 Automation")
 createText("Automation", "These features do work, just make sure you turn off a few before hatching...")
 createToggleButton("Automation", "Auto Shops", flags.autoShops)
@@ -253,7 +241,7 @@ createToggleButton("Automation", "Auto Bubble", flags.autoBubble)
 createToggleButton("Automation", "Auto Chests", flags.autoChest)
 createToggleButton("Automation", "Auto Mystery Box", flags.autoMysteryBox)
 createToggleButton("Automation", "Auto Use Keys", flags.autoUseKeys)
-credLabel("Automation", "Made By: Nep")
+credLabel("Automation", "Nep ©")
 
 
 createSectionTitle("Hatching", "🔹 Hatching")
@@ -265,7 +253,7 @@ tweendurationbox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 tweendurationbox.TextColor3 = Color3.fromRGB(255, 255, 255)
 tweendurationbox.Text = "25"
 tweendurationbox.Font = Enum.Font.GothamBold
-tweendurationbox.TextSize = 16
+tweendurationbox.TextSize = 18
 tweendurationbox.TextXAlignment = Enum.TextXAlignment.Center
 createCorner(10).Parent = tweendurationbox
 addToPage("Rifts", tweendurationbox)
@@ -317,7 +305,7 @@ createSectionTitle("Misc", "🔹 Miscellaneous")
     dropdownFrame.Size = UDim2.new(0, 400, 0, 40)
     dropdownFrame.Position = UDim2.new(0, 0, 0, 40) 
     dropdownFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
-    dropdownFrame.ZIndex = 1 -- bumped up from default (1) to 3
+    dropdownFrame.ZIndex = 1 
 
     createCorner(10).Parent = dropdownFrame
 
@@ -425,7 +413,6 @@ registersc("Misc", "Dice Script", "🎲", "https://raw.githubusercontent.com/Inf
 registersc("Misc", "Claw Script", "🕹️", "https://raw.githubusercontent.com/Inforestly/yay/refs/heads/main/bgsi2")
 registersc("Misc", "Infinite Yield", "♾️", "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source")
 
---== Automation Loops ==--
  function buyFromShop(shopName, itemCount)
     for i = 1, itemCount do
         RE:FireServer("BuyShopItem", shopName, i)
@@ -521,7 +508,6 @@ listLayout.Padding = UDim.new(0, 10)
 
 addToPage("Rifts", scrollFrame)
 
---== UPDATE RIFT LIST ==--
 function updateRiftList()
     for _, child in ipairs(scrollFrame:GetChildren()) do
         if not child:IsA("UIListLayout") then
@@ -618,7 +604,7 @@ function updateRiftList()
         sep.Font = Enum.Font.GothamBold
         sep.TextSize = 16
         sep.TextScaled = true
-        sep.Text = "--- Special Rifts ---"
+        sep.Text = ""
         sep.Visible = false
         sep.TextXAlignment = Enum.TextXAlignment.Center
         sep.Parent = scrollFrame
@@ -637,7 +623,6 @@ task.spawn(function()
     end
 end)
 
---== TELEPORT LOGIC ==--
 function tweenPos(pos)
 	local character = LP.Character
 	if character and character:FindFirstChild("HumanoidRootPart") then
@@ -668,7 +653,7 @@ end
 function teleportToRiftByLuck()
 	local riftFolder = Workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
 	local targetLuck = luckbox.Text
-	local targetName = eggname.Text -- already normalized
+	local targetName = eggname.Text 
 
 	local function normalizeName(name)
 		return name:lower():gsub("%s+", "-")
