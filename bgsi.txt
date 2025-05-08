@@ -166,7 +166,7 @@ end
 
  function createToggleButton(tab, name, flagRef)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 400, 0, 30)
+    button.Size = UDim2.new(0, 400, 0, 40)
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.TextColor3 = Color3.fromRGB(220, 220, 220)
     button.Font = Enum.Font.GothamBold
@@ -197,7 +197,7 @@ end
 
  function createButton(tab, name, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 400, 0, 20)
+    button.Size = UDim2.new(0, 400, 0, 40)
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Font = Enum.Font.GothamBold
