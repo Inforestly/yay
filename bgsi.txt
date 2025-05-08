@@ -18,7 +18,7 @@ local PR = RS.Remotes.Pickups.CollectPickup
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ScriptHub"
+ScreenGui.Name = "EclipseHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = CoreGui
@@ -37,10 +37,10 @@ createCorner(12).Parent = mainFrame
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.BackgroundTransparency = 1
-title.Text = "✨ BGS \226\136\158 | Hub v7.1"
+title.Text = "🌟 Eclipse Hub v7.12"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(0, 190, 160)
+title.TextColor3 = Color3.fromRGB(40, 120, 160)
 title.Parent = mainFrame
 
 local tabFrame = Instance.new("Frame")
@@ -711,4 +711,4 @@ LP.Idled:Connect(function()
     vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 end)
 
-print("Initialized & Loaded - v7.1")
+print("Init - Eclipse Hub | v7.12")
