@@ -428,7 +428,7 @@ for _, loopData in ipairs({
             for _, Folder in pairs(WS:WaitForChild("Rendered"):GetChildren()) do
                 if Folder.Name == "Chunker" then
                     for _, Model in pairs(Folder:GetChildren()) do
-                        if Model:IsA("Model") and not string.find(Model.Name, "Coming Soon") then
+   			 if Model:IsA("Model") and not string.find(Model.Name, "Coming Soon") and not string.find(Model.Name, "Egg") then
                             local pos = Model.PrimaryPart and Model.PrimaryPart.Position
                             if not pos then
                                 for _, Part in pairs(Model:GetChildren()) do
