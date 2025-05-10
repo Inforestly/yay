@@ -8,7 +8,7 @@ local vu = game:GetService("VirtualUser")
 local TS = game:GetService("TweenService")
 
 
-local RE = RS.Shared.Framework.Network.Remote.Event
+local RE = RS.Shared.Framework.Network.Remote.RemoteEvent
 local PR = RS.Remotes.Pickups.CollectPickup
 
  function createCorner(radius)
