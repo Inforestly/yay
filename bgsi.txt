@@ -229,7 +229,6 @@ local flags = {
     autoBubble = {state = false},
     autoChest = {state = false},
     autoHatch = {state = false},
-    autoMysteryBox = {state = false},
     autoUseKeys = {state = false},
 }
 
@@ -239,7 +238,6 @@ createToggleButton("Automation", "Auto Shops", flags.autoShops)
 createToggleButton("Automation", "Auto Pickup", flags.autoPickup)
 createToggleButton("Automation", "Auto Bubble", flags.autoBubble)
 createToggleButton("Automation", "Auto Chests", flags.autoChest)
-createToggleButton("Automation", "Auto Mystery Box", flags.autoMysteryBox)
 createToggleButton("Automation", "Auto Use Keys", flags.autoUseKeys)
 credLabel("Automation", "Nep ©")
 
@@ -455,9 +453,7 @@ for _, loopData in ipairs({
             task.wait(0.01)
         end
     end, waitTime = 0.01},
-    {flag = flags.autoMysteryBox, func = function()
-        RE:FireServer("UseGift", "Mystery Box", 10)
-    end, waitTime = 0.45},
+   
     {flag = flags.autoUseKeys, func = function()
         RE:FireServer("UnlockRiftChest", "golden-chest")
         RE:FireServer("UnlockRiftChest", "royal-chest")
