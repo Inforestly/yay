@@ -37,7 +37,7 @@ createCorner(12).Parent = mainFrame
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.BackgroundTransparency = 1
-title.Text = "🌟 Eclipse Hub v7.12"
+title.Text = "🌟 Eclipse Hub v7.13a"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(40, 120, 160)
@@ -411,55 +411,88 @@ registersc("Misc", "Dice Script", "🎲", "https://raw.githubusercontent.com/Inf
 registersc("Misc", "Claw Script", "🕹️", "https://raw.githubusercontent.com/Inforestly/yay/refs/heads/main/bgsi2")
 registersc("Misc", "Infinite Yield", "♾️", "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source")
 
- function buyFromShop(shopName, itemCount)
-    for i = 1, itemCount do
-        RE:FireServer("BuyShopItem", shopName, i)
+function buyFromShop(shopName, slotCount)
+    for slotIndex = 1, slotCount do
+        RE:FireServer("BuyShopItem", shopName, slotIndex, true)
         task.wait(0.01)
     end
 end
 
 for _, loopData in ipairs({
 {flag = flags.autoShops, func = function() buyFromShop("alien-shop", 3) buyFromShop("shard-shop", 3) buyFromShop("dice-shop", 3) end, waitTime = 0.01},    
-        {flag = flags.autoPickup, func = function()
-        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for _, Folder in pairs(WS:WaitForChild("Rendered"):GetChildren()) do
-                if Folder.Name == "Chunker" then
-                    for _, Model in pairs(Folder:GetChildren()) do
-   			 if Model:IsA("Model") and not string.find(Model.Name, "Coming Soon") and not string.find(Model.Name, "Egg") then
-                            local pos = Model.PrimaryPart and Model.PrimaryPart.Position
-                            if not pos then
-                                for _, Part in pairs(Model:GetChildren()) do
-                                    if Part:IsA("BasePart") then pos = Part.Position break end
-                                end
-                            end
-                            if pos then
-                                hrp.CFrame = CFrame.new(pos)
-                                PR:FireServer(Model.Name)
-                                task.wait(0.2)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end, waitTime = 1.1},
-    
-    {flag = flags.autoBubble, func = function() RE:FireServer("BlowBubble") end, waitTime = 0},
-    {flag = flags.autoHatch, func = function() RE:FireServer("HatchEgg", eggBox.Text .. " Egg", 6) end, waitTime = 0},
-    {flag = flags.autoChest, func = function()
-        for _, chest in ipairs({"Void Chest", "Giant Chest", "Infinity Chest", "Ticket Chest"}) do
-            RE:FireServer("ClaimChest", chest, true)
-            task.wait(0.01)
-        end
-    end, waitTime = 0.01},
-   
-    {flag = flags.autoUseKeys, func = function()
-        RE:FireServer("UnlockRiftChest", "golden-chest")
-        RE:FireServer("UnlockRiftChest", "royal-chest")
-        RE:FireServer("UnlockRiftChest", "dice-rift")
-    end, waitTime = 0.01},
-}) do
+   local automationTasks = {
+	{
+		flag = flags.autoPickup,
+		func = function()
+			local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+
+			for _, folder in ipairs(WS:WaitForChild("Rendered"):GetChildren()) do
+				if folder.Name ~= "Chunker" then continue end
+
+				for _, model in ipairs(folder:GetChildren()) do
+					if not model:IsA("Model") then continue end
+					if model.Name:find("Coming Soon") or model.Name:find("Egg") then continue end
+
+					local pos = model.PrimaryPart and model.PrimaryPart.Position
+					if not pos then
+						for _, part in ipairs(model:GetChildren()) do
+							if part:IsA("BasePart") then
+								pos = part.Position
+								break
+							end
+						end
+					end
+
+					if pos then
+						hrp.CFrame = CFrame.new(pos)
+						PR:FireServer(model.Name)
+						task.wait(0.2)
+					end
+				end
+			end
+		end,
+		waitTime = 1.1
+	},
+
+	{
+		flag = flags.autoBubble,
+		func = function()
+			RE:FireServer("BlowBubble")
+		end,
+		waitTime = 0
+	},
+
+	-- Auto Hatch Egg
+	{
+		flag = flags.autoHatch,
+		func = function()
+			RE:FireServer("HatchEgg", eggBox.Text .. " Egg", 6)
+		end,
+		waitTime = 0
+	},
+
+	{
+		flag = flags.autoChest,
+		func = function()
+			for _, chest in ipairs({"Void Chest", "Giant Chest", "Infinity Chest", "Ticket Chest"}) do
+				RE:FireServer("ClaimChest", chest, true)
+				task.wait(0.01)
+			end
+		end,
+		waitTime = 0.01
+	},
+
+	{
+		flag = flags.autoUseKeys,
+		func = function()
+			RE:FireServer("UnlockRiftChest", "golden-chest")
+			RE:FireServer("UnlockRiftChest", "royal-chest")
+			RE:FireServer("UnlockRiftChest", "dice-rift")
+		end,
+		waitTime = 0.01
+	},
+}
     task.spawn(function()
         while true do
             if loopData.flag.state then
@@ -707,4 +740,4 @@ LP.Idled:Connect(function()
     vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 end)
 
-print("Init - Eclipse Hub | v7.12")
+print("Init - Eclipse Hub | v7.13a")
