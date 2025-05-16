@@ -230,6 +230,7 @@ local flags = {
     autoChest = {state = false},
     autoHatch = {state = false},
     autoUseKeys = {state = false},
+    autoPlaytime = {state = false},
 }
 
 createSectionTitle("Automation", "🔹 Automation")
@@ -239,6 +240,7 @@ createToggleButton("Automation", "Auto Pickup", flags.autoPickup)
 createToggleButton("Automation", "Auto Bubble", flags.autoBubble)
 createToggleButton("Automation", "Auto Chests", flags.autoChest)
 createToggleButton("Automation", "Auto Use Keys", flags.autoUseKeys)
+createToggleButton("Automation", "Auto Playtime", flags.autoPlaytime)
 credLabel("Automation", "Nep ©")
 
 
@@ -419,15 +421,23 @@ function buyFromShop(shopName, slotCount)
 end
 
 local automationTasks = {
-{
-	flag = flags.autoShops,
-	func = function()
-		buyFromShop("alien-shop", 3)
-		buyFromShop("shard-shop", 3)
-		buyFromShop("dice-shop", 3)
-	end,
-	waitTime = 0.01
-},
+	{
+		flag = flags.autoPlaytime,
+		func = function()
+			RE:FireServer("ClaimAllPlaytime")
+		end,
+		waitTime = 0.01 -- Adjust as needed
+	},
+
+	{
+		flag = flags.autoShops,
+		func = function()
+			buyFromShop("alien-shop", 3)
+			buyFromShop("shard-shop", 3)
+			buyFromShop("dice-shop", 3)
+		end,
+		waitTime = 0.01
+	},
 
 	{
 		flag = flags.autoPickup,
@@ -482,7 +492,7 @@ local automationTasks = {
 	{
 		flag = flags.autoChest,
 		func = function()
-			for _, chest in ipairs({"Void Chest", "Giant Chest", "Infinity Chest", "Ticket Chest"}) do
+			for _, chest in ipairs({ "Void Chest", "Giant Chest", "Infinity Chest", "Ticket Chest" }) do
 				RE:FireServer("ClaimChest", chest, true)
 				task.wait(0.01)
 			end
@@ -662,7 +672,7 @@ task.spawn(function()
     end
 end)
 
-function tweenPos(pos)
+function tweenPos(pos, lookAt)
 	local character = LP.Character
 	if character and character:FindFirstChild("HumanoidRootPart") then
 		local hrp = character.HumanoidRootPart
@@ -675,7 +685,8 @@ function tweenPos(pos)
 			end
 
 			local duration = math.clamp(tonumber(tweendurationbox.Text) or 25, 1, 60)
-			local tween = TS:Create(hrp, TweenInfo.new(duration), {CFrame = CFrame.new(pos)})
+			local targetCFrame = lookAt and CFrame.new(pos, lookAt) or CFrame.new(pos)
+			local tween = TS:Create(hrp, TweenInfo.new(duration), {CFrame = targetCFrame})
 			tween:Play()
 			tween.Completed:Wait()
 
@@ -689,7 +700,7 @@ function tweenPos(pos)
 	end
 end
 
-function teleportToRiftByLuck()
+function RiftTP()
 	local riftFolder = Workspace:WaitForChild("Rendered"):WaitForChild("Rifts")
 	local targetLuck = luckbox.Text
 	local targetName = eggname.Text 
@@ -701,8 +712,8 @@ function teleportToRiftByLuck()
 	local function isRiftExpired(display)
 		local timerLabel = display:FindFirstChildWhichIsA("SurfaceGui") and display.SurfaceGui:FindFirstChild("Timer")
 		if timerLabel and timerLabel:IsA("TextLabel") then
-			local text = timerLabel.Text
-			return text:lower():find("0s") or text == "" or text:lower():find("expired")
+			local text = timerLabel.Text:lower()
+			return text == "" or text:find("expired") or text:find("0s")
 		end
 		return true
 	end
@@ -718,25 +729,26 @@ function teleportToRiftByLuck()
 		local display = rift:FindFirstChild("Display")
 		if not display then continue end
 
-		local expired = isRiftExpired(display)
-		if not expired then
+		if not isRiftExpired(display) then
 			bestMatch = rift
 			break
 		elseif not bestMatch then
-			bestMatch = rift 
+			bestMatch = rift -- fallback if all are expired
 		end
 	end
 
-	if not bestMatch then
-		return
-	end
+	if not bestMatch then return end
 
-	local targetPos = bestMatch:FindFirstChild("Display") and bestMatch.Display.Position + Vector3.new(0, 5, 0)
-	if targetPos then
-		tweenPos(targetPos)
+	local display = bestMatch:FindFirstChild("Display")
+	if display and display:IsA("BasePart") then
+		-- Teleport 5 studs in front of the sign
+		local forward = display.CFrame.LookVector
+		local targetPos = display.Position - forward * 5 + Vector3.new(0, 3, 0)
+		tweenPos(targetPos, display.Position)
 	end
 end
-teleportBtn.MouseButton1Click:Connect(teleportToRiftByLuck)
+
+teleportBtn.MouseButton1Click:Connect(RiftTP)
 
 UIS.InputBegan:Connect(function(input, gp)
     if not gp and input.KeyCode == Enum.KeyCode.LeftControl then
