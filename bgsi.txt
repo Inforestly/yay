@@ -439,39 +439,38 @@ local automationTasks = {
 		waitTime = 0.01
 	},
 
-	{
-		flag = flags.autoPickup,
-		func = function()
-			local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-			if not hrp then return end
+{
+	flag = flags.autoPickup,
+	func = function()
+		local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
 
-			for _, folder in ipairs(WS:WaitForChild("Rendered"):GetChildren()) do
-				if folder.Name ~= "Chunker" then continue end
+		for _, folder in ipairs(WS:WaitForChild("Rendered"):GetChildren()) do
+			if folder.Name ~= "Chunker" then continue end
 
-				for _, model in ipairs(folder:GetChildren()) do
-					if not model:IsA("Model") then continue end
-					if model.Name:find("Coming Soon") or model.Name:find("Egg") then continue end
+			for _, model in ipairs(folder:GetChildren()) do
+				if not model:IsA("Model") then continue end
+				if model.Name:find("Coming Soon") or model.Name:find("Egg") then continue end
 
-					local pos = model.PrimaryPart and model.PrimaryPart.Position
-					if not pos then
-						for _, part in ipairs(model:GetChildren()) do
-							if part:IsA("BasePart") then
-								pos = part.Position
-								break
-							end
+				local pos = model.PrimaryPart and model.PrimaryPart.Position
+				if not pos then
+					for _, part in ipairs(model:GetChildren()) do
+						if part:IsA("BasePart") then
+							pos = part.Position
+							break
 						end
 					end
+				end
 
-					if pos then
-						hrp.CFrame = CFrame.new(pos)
-						PR:FireServer(model.Name)
-						task.wait(0.2)
-					end
+				if pos and (hrp.Position - pos).Magnitude <= 30 then -- 30 studs radius
+					PR:FireServer(model.Name)
+					task.wait(0.1)
 				end
 			end
-		end,
-		waitTime = 1.1
-	},
+		end
+	end,
+	waitTime = 1.1
+}
 
 	{
 		flag = flags.autoBubble,
