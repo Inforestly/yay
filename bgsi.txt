@@ -341,15 +341,15 @@ createSectionTitle("Misc", "🔹 Miscellaneous")
     local islands = {
         {Name = "🌍 The Overworld", Path = "Workspace.Worlds.The Overworld.PortalSpawn"},
         {Name = "Floating Island", Path = "Workspace.Worlds.The Overworld.Islands.Floating Island.Island.Portal.Spawn"},
-        {Name = "Outer Space Island", Path = "Workspace.Worlds.The Overworld.Islands.Outer Space.Island.Portal.Spawn"},
-        {Name = "Twilight Island", Path = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"},
+        {Name = "Outer Space", Path = "Workspace.Worlds.The Overworld.Islands.Outer Space.Island.Portal.Spawn"},
+        {Name = "Twilight", Path = "Workspace.Worlds.The Overworld.Islands.Twilight.Island.Portal.Spawn"},
         {Name = "The Void", Path = "Workspace.Worlds.The Overworld.Islands.The Void.Island.Portal.Spawn"},
-        {Name = "Zen Island", Path = "Workspace.Worlds.The Overworld.Islands.Zen.Island.Portal.Spawn"},
+        {Name = "Zen", Path = "Workspace.Worlds.The Overworld.Islands.Zen.Island.Portal.Spawn"},
         {Name = "🎲 Minigame Paradise", Path = "Workspace.Worlds.Minigame Paradise.PortalSpawn"},
         {Name = "Dice Island", Path = "Workspace.Worlds.Minigame Paradise.Islands.Dice Island.Island.Portal.Spawn"},
         {Name = "Minecart Forest", Path = "Workspace.Worlds.Minigame Paradise.Islands.Minecart Forest.Island.Portal.Spawn"},
         {Name = "Robot Factory", Path = "Workspace.Worlds.Minigame Paradise.Islands.Robot Factory.Island.Portal.Spawn"},
-        {Name = "Robot Factory", Path = "Workspace.Worlds.Minigame Paradise.Islands.Hyperwave Island.Island.Portal.Spawn"},
+        {Name = "Hyperwave", Path = "Workspace.Worlds.Minigame Paradise.Islands.Hyperwave Island.Island.Portal.Spawn"},
 
    
  }
