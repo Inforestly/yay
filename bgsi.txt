@@ -462,7 +462,7 @@ local automationTasks = {
 					end
 				end
 
-				if pos and (hrp.Position - pos).Magnitude <= 100 then 
+				if pos and (hrp.Position - pos).Magnitude <= 150 then 
 					PR:FireServer(model.Name)
 					task.wait(0.01)
 				end
