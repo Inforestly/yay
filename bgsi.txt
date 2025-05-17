@@ -462,15 +462,15 @@ local automationTasks = {
 					end
 				end
 
-				if pos and (hrp.Position - pos).Magnitude <= 30 then -- 30 studs radius
+				if pos and (hrp.Position - pos).Magnitude <= 100 then 
 					PR:FireServer(model.Name)
-					task.wait(0.1)
+					task.wait(0.01)
 				end
 			end
 		end
 	end,
-	waitTime = 1.1
-}
+	waitTime = 0.01
+},
 
 	{
 		flag = flags.autoBubble,
