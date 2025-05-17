@@ -349,6 +349,9 @@ createSectionTitle("Misc", "🔹 Miscellaneous")
         {Name = "Dice Island", Path = "Workspace.Worlds.Minigame Paradise.Islands.Dice Island.Island.Portal.Spawn"},
         {Name = "Minecart Forest", Path = "Workspace.Worlds.Minigame Paradise.Islands.Minecart Forest.Island.Portal.Spawn"},
         {Name = "Robot Factory", Path = "Workspace.Worlds.Minigame Paradise.Islands.Robot Factory.Island.Portal.Spawn"},
+        {Name = "Robot Factory", Path = "Workspace.Worlds.Minigame Paradise.Islands.Hyperwave Island.Island.Portal.Spawn"},
+
+   
  }
 
     for _, island in ipairs(islands) do
