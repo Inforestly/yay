@@ -767,33 +767,33 @@ task.spawn(function()
 end)
 
 function teleportPos(pos, lookAt)
-	local character = LP.Character
-	if character and character:FindFirstChild("HumanoidRootPart") then
-		local hrp = character.HumanoidRootPart
-		local hum = character:FindFirstChild("Humanoid")
+    local character = LP.Character
+    if character and character:FindFirstChild('HumanoidRootPart') then
+        local hrp = character.HumanoidRootPart
+        local hum = character:FindFirstChild('Humanoid')
 
-		if hum then
-			-- Disable physics control to prevent falling/animation glitch on teleport
-			hum:ChangeState(Enum.HumanoidStateType.Physics)
-			hum.PlatformStand = true
+        if hum then
+            -- Disable physics control to prevent falling/animation glitch on teleport
+            hum:ChangeState(Enum.HumanoidStateType.Physics)
+            hum.PlatformStand = true
 
-			-- Disable collision to avoid being stuck in objects on teleport
-			for _, part in ipairs(character:GetDescendants()) do
-				if part:IsA("BasePart") then
-					part.CanCollide = false
-				end
-			end
+            -- Disable collision to avoid being stuck in objects on teleport
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA('BasePart') then
+                    part.CanCollide = false
+                end
+            end
 
-			-- ✅ Instantly teleport
-			hrp.CFrame = CFrame.new(pos, lookAt)
+            -- ✅ Instantly teleport
+            hrp.CFrame = CFrame.new(pos, lookAt)
 
-			-- Re-enable control
-			task.delay(0.1, function()
-				hum.PlatformStand = false
-				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-			end)
-		end
-	end
+            -- Re-enable control
+            task.delay(0.1, function()
+                hum.PlatformStand = false
+                hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end)
+        end
+    end
 end
 function RiftTP()
     local riftFolder = Workspace:WaitForChild('Rendered'):WaitForChild('Rifts')
@@ -843,14 +843,15 @@ function RiftTP()
         return
     end
 
-    local display = bestMatch:FindFirstChild('Display')
-    if display and display:IsA('BasePart') then
-        -- Teleport 5 studs in front of the sign
-        local forward = display.CFrame.LookVector
-        local targetPos = display.Position - forward * 5 + Vector3.new(0, 6, 0)
-        teleportPos(targetPos, display.Position)
-    end
+local display = bestMatch:FindFirstChild("Output")
+if display and display:IsA("BasePart") then
+	local up = display.CFrame.UpVector
+	local heightAbove = display.Size.Y/2 + 8  
+	local targetPos = display.Position + up * heightAbove
+	teleportPos(targetPos, display.Position)
 end
+end
+
 
 teleportBtn.MouseButton1Click:Connect(RiftTP)
 
@@ -866,4 +867,4 @@ LP.Idled:Connect(function()
     vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 end)
 
-print('Init - Eclipse Hub | v7.13a')
+print('Init - Eclipse Hub | v7.14b')
