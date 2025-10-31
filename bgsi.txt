@@ -766,44 +766,35 @@ task.spawn(function()
     end
 end)
 
-function tweenPos(pos, lookAt)
-    local character = LP.Character
-    if character and character:FindFirstChild('HumanoidRootPart') then
-        local hrp = character.HumanoidRootPart
-        local hum = character:FindFirstChild('Humanoid')
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.Physics)
-            hum.PlatformStand = true
-            for _, part in ipairs(character:GetDescendants()) do
-                if part:IsA('BasePart') then
-                    part.CanCollide = false
-                end
-            end
+function teleportPos(pos, lookAt)
+	local character = LP.Character
+	if character and character:FindFirstChild("HumanoidRootPart") then
+		local hrp = character.HumanoidRootPart
+		local hum = character:FindFirstChild("Humanoid")
 
-            local duration =
-                math.clamp(tonumber(tweendurationbox.Text) or 25, 1, 60)
-            local targetCFrame = lookAt and CFrame.new(pos, lookAt)
-                or CFrame.new(pos)
-            local tween = TS:Create(
-                hrp,
-                TweenInfo.new(duration),
-                { CFrame = targetCFrame }
-            )
-            tween:Play()
-            tween.Completed:Wait()
+		if hum then
+			-- Disable physics control to prevent falling/animation glitch on teleport
+			hum:ChangeState(Enum.HumanoidStateType.Physics)
+			hum.PlatformStand = true
 
-            task.wait(0.1)
-            hum.PlatformStand = false
-            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-            for _, part in ipairs(character:GetDescendants()) do
-                if part:IsA('BasePart') then
-                    part.CanCollide = true
-                end
-            end
-        end
-    end
+			-- Disable collision to avoid being stuck in objects on teleport
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+
+			-- ✅ Instantly teleport
+			hrp.CFrame = CFrame.new(pos, lookAt)
+
+			-- Re-enable control
+			task.delay(0.1, function()
+				hum.PlatformStand = false
+				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+			end)
+		end
+	end
 end
-
 function RiftTP()
     local riftFolder = Workspace:WaitForChild('Rendered'):WaitForChild('Rifts')
     local targetLuck = luckbox.Text
@@ -856,8 +847,8 @@ function RiftTP()
     if display and display:IsA('BasePart') then
         -- Teleport 5 studs in front of the sign
         local forward = display.CFrame.LookVector
-        local targetPos = display.Position - forward * 5 + Vector3.new(0, 3, 0)
-        tweenPos(targetPos, display.Position)
+        local targetPos = display.Position - forward * 5 + Vector3.new(0, 6, 0)
+        teleportPos(targetPos, display.Position)
     end
 end
 
