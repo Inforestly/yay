@@ -1,0 +1,19 @@
+local player = game:GetService('Players').LocalPlayer
+local playerGui = player:WaitForChild('PlayerGui')
+
+ function disableTransitionGui()
+    local gui = playerGui:FindFirstChild('TransitionGui')
+    if gui then
+        gui.Enabled = false
+    end
+end
+
+disableTransitionGui()
+
+playerGui.ChildAdded:Connect(function(child)
+    if child.Name == 'TransitionGui' then
+        child.Enabled = false
+    end
+end)
+
+
