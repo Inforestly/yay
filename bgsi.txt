@@ -8,7 +8,6 @@ local vu = game:GetService('VirtualUser')
 local TS = game:GetService('TweenService')
 
 local RE = RS.Shared.Framework.Network.Remote.RemoteEvent
-local PR = RS.Remotes.Pickups.CollectPickup
 
 function createCorner(radius)
     local corner = Instance.new('UICorner')
@@ -23,23 +22,23 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = CoreGui
 
 local mainFrame = Instance.new('Frame')
-mainFrame.Size = UDim2.new(0, 500, 0, 600)
+mainFrame.Size = UDim2.new(0, 500, 0, 550)
 mainFrame.Position = UDim2.new(0, 50, 0, 50)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BackgroundColor3 = Color3.fromRGB(36, 41, 46)
 mainFrame.BorderSizePixel = 0
 mainFrame.BackgroundTransparency = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = ScreenGui
-createCorner(12).Parent = mainFrame
+createCorner(14).Parent = mainFrame
 
 local title = Instance.new('TextLabel')
-title.Size = UDim2.new(1, 0, 0, 50)
+title.Size = UDim2.new(1, 0, 0, 45)
 title.BackgroundTransparency = 1
 title.Text = '🌟 Eclipse Hub v7.14b'
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(40, 120, 160)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Parent = mainFrame
 
 local tabFrame = Instance.new('Frame')
@@ -61,8 +60,8 @@ listLayout.Parent = tabFrame
 
 function createTab(name)
     local tab = Instance.new('TextButton')
-    tab.Size = UDim2.new(0, 110, 1, 0)
-    tab.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    tab.Size = UDim2.new(0, 135, 1, 0)
+    tab.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
     tab.TextColor3 = Color3.fromRGB(255, 255, 255)
     tab.Font = Enum.Font.GothamBold
     tab.TextSize = 16
@@ -90,7 +89,6 @@ end
 
 pages.Automation = createPage()
 pages.Hatching = createPage()
-pages.Rifts = createPage()
 pages.Misc = createPage()
 
 function switchToTab(tabName)
@@ -104,7 +102,7 @@ automationTab.MouseButton1Click:Connect(function()
     switchToTab('Automation')
 end)
 
-local hatchingTab = createTab('🥚 Hatching')
+local hatchingTab = createTab('🥚 Hatching / Rifts')
 hatchingTab.MouseButton1Click:Connect(function()
     switchToTab('Hatching')
 end)
@@ -114,14 +112,9 @@ miscTab.MouseButton1Click:Connect(function()
     switchToTab('Misc')
 end)
 
-local riftsTab = createTab('🏝️ Rifts')
-riftsTab.MouseButton1Click:Connect(function()
-    switchToTab('Rifts')
-end)
-
 switchToTab('Automation')
 
-local yOffsets = { Automation = 5, Hatching = 5, Rifts = 5, Misc = 5 }
+local yOffsets = { Automation = 5, Hatching = 5, Misc = 5 }
 function addToPage(tabName, element)
     local page = pages[tabName]
     element.Position = UDim2.new(0, 35, 0, yOffsets[tabName])
@@ -154,22 +147,10 @@ function createText(tab, text)
     addToPage(tab, label)
 end
 
-function credLabel(tab, text)
-    local label = Instance.new('TextLabel')
-    label.Size = UDim2.new(0, 400, 0, 35)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 16
-    label.TextColor3 = Color3.fromRGB(255, 255, 0)
-    label.TextXAlignment = Enum.TextXAlignment.Center
-    addToPage(tab, label)
-end
-
 function createToggleButton(tab, name, flagRef)
     local button = Instance.new('TextButton')
     button.Size = UDim2.new(0, 400, 0, 40)
-    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
     button.TextColor3 = Color3.fromRGB(220, 220, 220)
     button.Font = Enum.Font.GothamBold
     button.TextSize = 17
@@ -178,19 +159,19 @@ function createToggleButton(tab, name, flagRef)
     createCorner(8).Parent = button
 
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+        button.BackgroundColor3 = Color3.fromRGB(45, 186, 78)
     end)
     button.MouseLeave:Connect(function()
         if not flagRef.state then
-            button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            button.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
         end
     end)
 
     button.MouseButton1Click:Connect(function()
         flagRef.state = not flagRef.state
         button.Text = name .. ': ' .. (flagRef.state and 'ON' or 'OFF')
-        button.BackgroundColor3 = flagRef.state and Color3.fromRGB(0, 190, 110)
-            or Color3.fromRGB(50, 50, 50)
+        button.BackgroundColor3 = flagRef.state and Color3.fromRGB(45, 186, 78)
+            or Color3.fromRGB(43, 49, 55)
     end)
 
     addToPage(tab, button)
@@ -200,7 +181,7 @@ end
 function createButton(tab, name, callback)
     local button = Instance.new('TextButton')
     button.Size = UDim2.new(0, 400, 0, 40)
-    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Font = Enum.Font.GothamBold
     button.TextSize = 17
@@ -209,10 +190,10 @@ function createButton(tab, name, callback)
     createCorner(10).Parent = button
 
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+        button.BackgroundColor3 = Color3.fromRGB(45, 186, 78)
     end)
     button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        button.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
     end)
 
     button.MouseButton1Click:Connect(function()
@@ -227,7 +208,6 @@ end
 
 local flags = {
     autoShops = { state = false },
-    autoPickup = { state = false },
     autoBubble = { state = false },
     autoChest = { state = false },
     autoHatch = { state = false },
@@ -236,59 +216,17 @@ local flags = {
 }
 
 createSectionTitle('Automation', '🔹 Automation')
-createText(
-    'Automation',
-    'These features do work, just make sure you turn off a few before hatching...'
-)
 createToggleButton('Automation', 'Auto Shops', flags.autoShops)
-createToggleButton('Automation', 'Auto Pickup', flags.autoPickup)
 createToggleButton('Automation', 'Auto Bubble', flags.autoBubble)
 createToggleButton('Automation', 'Auto Chests', flags.autoChest)
 createToggleButton('Automation', 'Auto Use Keys', flags.autoUseKeys)
 createToggleButton('Automation', 'Auto Playtime', flags.autoPlaytime)
-credLabel('Automation', 'Nep ©')
 
-createSectionTitle('Hatching', '🔹 Hatching')
-createSectionTitle('Rifts', '🔹 Rift Teleportation')
-
-local tweendurationbox = Instance.new('TextBox')
-tweendurationbox.Size = UDim2.new(0, 400, 0, 35)
-tweendurationbox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tweendurationbox.TextColor3 = Color3.fromRGB(255, 255, 255)
-tweendurationbox.Text = '25'
-tweendurationbox.Font = Enum.Font.GothamBold
-tweendurationbox.TextSize = 18
-tweendurationbox.TextXAlignment = Enum.TextXAlignment.Center
-createCorner(10).Parent = tweendurationbox
-addToPage('Rifts', tweendurationbox)
-
-local eggname = Instance.new('TextBox')
-eggname.Size = UDim2.new(0, 400, 0, 35)
-eggname.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-eggname.TextColor3 = Color3.fromRGB(255, 255, 255)
-eggname.Text = 'rift-name'
-eggname.Font = Enum.Font.GothamBold
-eggname.TextSize = 16
-eggname.TextXAlignment = Enum.TextXAlignment.Center
-createCorner(10).Parent = eggname
-addToPage('Rifts', eggname)
-
-local luckbox = Instance.new('TextBox')
-luckbox.Size = UDim2.new(0, 400, 0, 35)
-luckbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-luckbox.TextColor3 = Color3.fromRGB(255, 255, 255)
-luckbox.Text = 'Luck Multi | (x5, x10, x25)'
-luckbox.Font = Enum.Font.GothamBold
-luckbox.TextSize = 16
-luckbox.TextXAlignment = Enum.TextXAlignment.Center
-createCorner(10).Parent = luckbox
-addToPage('Rifts', luckbox)
-
-local teleportBtn = createButton('Rifts', '🚀 Teleport To Rift')
+createSectionTitle('Hatching', '🔹 Hatching / Rift Teleportation')
 
 local eggBox = Instance.new('TextBox')
 eggBox.Size = UDim2.new(0, 400, 0, 35)
-eggBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+eggBox.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
 eggBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 eggBox.Text = '🥚 Egg Name'
 eggBox.Font = Enum.Font.GothamBold
@@ -300,11 +238,12 @@ addToPage('Hatching', eggBox)
 createToggleButton('Hatching', 'Auto Hatch', flags.autoHatch)
 
 createSectionTitle('Misc', '🔹 Miscellaneous')
+
 function TeleportDropdown()
     local dropdownFrame = Instance.new('Frame')
     dropdownFrame.Size = UDim2.new(0, 400, 0, 40)
     dropdownFrame.Position = UDim2.new(0, 0, 0, 40)
-    dropdownFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 36)
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
     dropdownFrame.ZIndex = 1
 
     createCorner(10).Parent = dropdownFrame
@@ -386,7 +325,7 @@ function TeleportDropdown()
     for _, island in ipairs(islands) do
         local option = Instance.new('TextButton')
         option.Size = UDim2.new(0.8, 0, 0, 30)
-        option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        option.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
         option.TextColor3 = Color3.fromRGB(255, 255, 255)
         option.Font = Enum.Font.GothamBold
         option.TextSize = 20
@@ -402,7 +341,7 @@ function TeleportDropdown()
         end)
 
         option.MouseLeave:Connect(function()
-            option.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            option.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
         end)
 
         option.MouseButton1Click:Connect(function()
@@ -492,7 +431,7 @@ local automationTasks = {
         func = function()
             RE:FireServer('ClaimAllPlaytime')
         end,
-        waitTime = 0.01, -- Adjust as needed
+        waitTime = 0.01,
     },
 
     {
@@ -506,50 +445,6 @@ local automationTasks = {
         waitTime = 0.01,
     },
 
-    {
-        flag = flags.autoPickup,
-        func = function()
-            local hrp = LP.Character
-                and LP.Character:FindFirstChild('HumanoidRootPart')
-            if not hrp then
-                return
-            end
-
-            for _, folder in ipairs(WS:WaitForChild('Rendered'):GetChildren()) do
-                if folder.Name ~= 'Chunker' then
-                    continue
-                end
-
-                for _, model in ipairs(folder:GetChildren()) do
-                    if not model:IsA('Model') then
-                        continue
-                    end
-                    if
-                        model.Name:find('Coming Soon')
-                        or model.Name:find('Egg')
-                    then
-                        continue
-                    end
-
-                    local pos = model.PrimaryPart and model.PrimaryPart.Position
-                    if not pos then
-                        for _, part in ipairs(model:GetChildren()) do
-                            if part:IsA('BasePart') then
-                                pos = part.Position
-                                break
-                            end
-                        end
-                    end
-
-                    if pos and (hrp.Position - pos).Magnitude <= 150 then
-                        PR:FireServer(model.Name)
-                        task.wait(0.01)
-                    end
-                end
-            end
-        end,
-        waitTime = 0.01,
-    },
 
     {
         flag = flags.autoBubble,
@@ -593,8 +488,6 @@ local automationTasks = {
         waitTime = 0.01,
     },
 }
-
--- Spawn loops for each automation task
 for _, loopData in ipairs(automationTasks) do
     task.spawn(function()
         while true do
@@ -609,18 +502,12 @@ end
 local background = Instance.new('Frame')
 background.Size = UDim2.new(0.8, 0, 0.4, 0)
 background.Position = UDim2.new(0.1, 0, 0.1, 0)
-background.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+background.BackgroundColor3 = Color3.fromRGB(43, 49, 55)
 background.BorderSizePixel = 0
+background.Transparency = 1
 createCorner(10).Parent = background
 background.ZIndex = 2
-addToPage('Rifts', background)
-
-local stroke = Instance.new('UIStroke')
-stroke.Color = Color3.fromRGB(255, 70, 0)
-stroke.Thickness = 2.5
-stroke.Transparency = 0.2
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-stroke.Parent = background
+addToPage('Hatching', background)
 
 local scrollFrame = Instance.new('ScrollingFrame')
 scrollFrame.Size = UDim2.new(0.8, 0, 0.9, 0)
@@ -631,12 +518,18 @@ scrollFrame.BorderSizePixel = 0
 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollFrame.ScrollBarThickness = 5
 scrollFrame.ZIndex = 5
+addToPage('Hatching', scrollFrame)
 
 local listLayout = Instance.new('UIListLayout')
+listLayout.Padding = UDim.new(0, 6)
+listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 listLayout.Parent = scrollFrame
-listLayout.Padding = UDim.new(0, 10)
 
-addToPage('Rifts', scrollFrame)
+local padding = Instance.new('UIPadding')
+padding.PaddingLeft = UDim.new(0.05, 0)
+padding.PaddingRight = UDim.new(0.05, 0)
+padding.Parent = scrollFrame
 
 function updateRiftList()
     for _, child in ipairs(scrollFrame:GetChildren()) do
@@ -690,47 +583,88 @@ function updateRiftList()
         return a.luck > b.luck
     end)
 
+    local function applyRainbowText(label)
+        spawn(function()
+            local hue = 0
+            while label.Parent do
+                hue = (hue + 0.01) % 1
+                label.TextColor3 = Color3.fromHSV(hue, 1, 1)
+                wait(0.05)
+            end
+        end)
+    end
+
     function addRiftButton(riftData, isSpecial)
         local rift = riftData.instance
         local display = rift:FindFirstChild('Display')
         local luckText, timerText = '', ''
 
         if display then
-            local surfaceGui = display:FindFirstChildWhichIsA('SurfaceGui')
-            local icon = surfaceGui and surfaceGui:FindFirstChild('Icon')
+            local gui = display:FindFirstChildWhichIsA('SurfaceGui')
+            local icon = gui and gui:FindFirstChild('Icon')
             local luckLabel = icon and icon:FindFirstChild('Luck')
-            local timerLabel = surfaceGui and surfaceGui:FindFirstChild('Timer')
+            local timerLabel = gui and gui:FindFirstChild('Timer')
 
-            if luckLabel and luckLabel:IsA('TextLabel') then
+            if luckLabel then
                 luckText = luckLabel.Text
             end
-            if timerLabel and timerLabel:IsA('TextLabel') then
+            if timerLabel then
                 timerText = timerLabel.Text
             end
         end
 
         local button = Instance.new('TextButton')
-        button.Size = UDim2.new(1, 0, 0, 20)
-        button.BackgroundTransparency = 1
-        button.TextColor3 = isSpecial and Color3.fromRGB(190, 190, 255)
-            or Color3.fromRGB(0, 255, 0)
+        button.Size = UDim2.new(0.95, 0, 0, 35)
+        button.BackgroundColor3 = isSpecial and Color3.fromRGB(60, 60, 95)
+            or Color3.fromRGB(45, 60, 45)
+        button.AutoButtonColor = false
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.Font = Enum.Font.GothamBold
-        button.TextSize = 19
-        button.TextXAlignment = Enum.TextXAlignment.Center
+        button.TextSize = 16
+        button.TextScaled = true
         button.Text = string.format(
-            '- %s | Luck: %s | %s',
+            '%s  |  Luck: %s  |  %s',
             rift.Name,
             luckText,
             timerText
         )
-        button.Parent = scrollFrame
         button.ZIndex = 10
+        createCorner(12).Parent = button
+        button.Parent = scrollFrame
+
+        button.MouseEnter:Connect(function()
+            button.BackgroundColor3 = isSpecial and Color3.fromRGB(70, 70, 110)
+                or Color3.fromRGB(55, 75, 55)
+        end)
+
+        button.MouseLeave:Connect(function()
+            button.BackgroundColor3 = isSpecial and Color3.fromRGB(60, 60, 95)
+                or Color3.fromRGB(45, 60, 45)
+        end)
 
         button.MouseButton1Click:Connect(function()
-            if luckbox and eggname then
-                local cleanLuck = tonumber(luckText:match('%d+')) or 0
-                luckbox.Text = 'x' .. tostring(cleanLuck)
-                eggname.Text = normalizeName(rift.Name)
+            local baseName = normalizeName(rift.Name)
+            local bestRift, bestLuck = nil, -1
+
+            for _, other in ipairs(rift.Parent:GetChildren()) do
+                if normalizeName(other.Name) == baseName then
+                    local L = extractLuck(other)
+                    if L > bestLuck then
+                        bestLuck = L
+                        bestRift = other
+                    end
+                end
+            end
+
+            if not bestRift then
+                return
+            end
+
+            local displayPart = bestRift:FindFirstChild('Output')
+            if displayPart and displayPart:IsA('BasePart') then
+                local up = displayPart.CFrame.UpVector
+                local targetPos = displayPart.Position + up * 10
+                teleportPos(targetPos, displayPart.Position)
             end
         end)
     end
@@ -741,13 +675,13 @@ function updateRiftList()
 
     if #specialRifts > 0 then
         local sep = Instance.new('TextLabel')
-        sep.Size = UDim2.new(1, 0, 0, 18)
-        sep.BackgroundTransparency = 1
+        sep.Size = UDim2.new(0.55, 0, 0, 16)
+        sep.BackgroundTransparency = 0
         sep.TextColor3 = Color3.fromRGB(255, 255, 255)
         sep.Font = Enum.Font.GothamBold
         sep.TextSize = 16
         sep.TextScaled = true
-        sep.Text = ''
+        sep.Text = 'Test'
         sep.Visible = false
         sep.TextXAlignment = Enum.TextXAlignment.Center
         sep.Parent = scrollFrame
@@ -773,21 +707,17 @@ function teleportPos(pos, lookAt)
         local hum = character:FindFirstChild('Humanoid')
 
         if hum then
-            -- Disable physics control to prevent falling/animation glitch on teleport
             hum:ChangeState(Enum.HumanoidStateType.Physics)
             hum.PlatformStand = true
 
-            -- Disable collision to avoid being stuck in objects on teleport
             for _, part in ipairs(character:GetDescendants()) do
                 if part:IsA('BasePart') then
                     part.CanCollide = false
                 end
             end
 
-            -- ✅ Instantly teleport
             hrp.CFrame = CFrame.new(pos, lookAt)
 
-            -- Re-enable control
             task.delay(0.1, function()
                 hum.PlatformStand = false
                 hum:ChangeState(Enum.HumanoidStateType.GettingUp)
@@ -835,7 +765,7 @@ function RiftTP()
             bestMatch = rift
             break
         elseif not bestMatch then
-            bestMatch = rift -- fallback if all are expired
+            bestMatch = rift
         end
     end
 
@@ -843,17 +773,14 @@ function RiftTP()
         return
     end
 
-local display = bestMatch:FindFirstChild("Output")
-if display and display:IsA("BasePart") then
-	local up = display.CFrame.UpVector
-	local heightAbove = display.Size.Y/2 + 8  
-	local targetPos = display.Position + up * heightAbove
-	teleportPos(targetPos, display.Position)
+    local display = bestMatch:FindFirstChild('Output')
+    if display and display:IsA('BasePart') then
+        local up = display.CFrame.UpVector
+        local heightAbove = display.Size.Y / 2 + 8
+        local targetPos = display.Position + up * heightAbove
+        teleportPos(targetPos, display.Position)
+    end
 end
-end
-
-
-teleportBtn.MouseButton1Click:Connect(RiftTP)
 
 UIS.InputBegan:Connect(function(input, gp)
     if not gp and input.KeyCode == Enum.KeyCode.LeftControl then
