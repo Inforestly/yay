@@ -5,7 +5,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild('HumanoidRootPart')
 local humanoid = character:WaitForChild('Humanoid')
 
-local DELAY_BETWEEN = 2.1
+local DELAY_BETWEEN = 3
 local DEFAULT_KEY = Enum.KeyCode.RightShift
 local currentKeybind = DEFAULT_KEY
 local WALK_SPEED = 35
