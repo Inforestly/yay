@@ -5,17 +5,19 @@ local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild('HumanoidRootPart')
 local humanoid = character:WaitForChild('Humanoid')
 
-local DELAY_BETWEEN = 3 -- Delay between teleports
-local POST_TELEPORT_BUFFER = 1.5 -- Extra wait for animations/rewards
+--// CONFIG
+local DELAY_BETWEEN = 3
+local WALK_SPEED = 35
 local DEFAULT_KEY = Enum.KeyCode.RightShift
 local currentKeybind = DEFAULT_KEY
-local WALK_SPEED = 35
 
+--// GUI
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'TeleportGUI'
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild('PlayerGui')
 
+-- Background frame
 local frame = Instance.new('Frame')
 frame.Size = UDim2.new(0, 250, 0, 180)
 frame.Position = UDim2.new(0.5, -125, 0.4, -90)
@@ -37,6 +39,7 @@ frameGradient.Color = ColorSequence.new{
 frameGradient.Rotation = 45
 frameGradient.Parent = frame
 
+-- Start/Stop toggle button
 local toggleBtn = Instance.new('TextButton')
 toggleBtn.Size = UDim2.new(0.8, 0, 0, 50)
 toggleBtn.Position = UDim2.new(0.1, 0, 0.15, 0)
@@ -52,6 +55,7 @@ local toggleCorner = Instance.new('UICorner')
 toggleCorner.CornerRadius = UDim.new(0, 14)
 toggleCorner.Parent = toggleBtn
 
+-- Keybind button
 local keybindBtn = Instance.new('TextButton')
 keybindBtn.Size = UDim2.new(0.8, 0, 0, 35)
 keybindBtn.Position = UDim2.new(0.1, 0, 0.50, 0)
@@ -67,6 +71,7 @@ local keyCorner = Instance.new('UICorner')
 keyCorner.CornerRadius = UDim.new(0, 12)
 keyCorner.Parent = keybindBtn
 
+-- Status label (centered below Start button)
 local status = Instance.new('TextLabel')
 status.Size = UDim2.new(0.8, 0, 0, 30)
 status.Position = UDim2.new(0.1, 0, 0.70, 0)
@@ -81,14 +86,14 @@ status.TextXAlignment = Enum.TextXAlignment.Center
 status.TextYAlignment = Enum.TextYAlignment.Center
 status.Parent = frame
 
--- Toggle GUI visibility
+--// Toggle GUI visibility with keybind
 UIS.InputBegan:Connect(function(input, gp)
     if not gp and input.KeyCode == currentKeybind then
         frame.Visible = not frame.Visible
     end
 end)
 
--- Find Activation.Root parts
+--// Find Activation.Root parts in Christmas World
 local housesFolder = workspace:WaitForChild("Worlds"):WaitForChild("Christmas World"):WaitForChild("GiveGifts")
 local activations = {}
 for _, obj in ipairs(housesFolder:GetDescendants()) do
@@ -97,6 +102,16 @@ for _, obj in ipairs(housesFolder:GetDescendants()) do
     end
 end
 
+--// Find PresentRain parts
+local presentRainFolder = workspace:WaitForChild("Rendered"):WaitForChild("PresentRain")
+local presents = {}
+for _, obj in ipairs(presentRainFolder:GetDescendants()) do
+    if obj:IsA("BasePart") then
+        table.insert(presents, obj)
+    end
+end
+
+--// Loop control
 local running = false
 
 local function toggleLoop()
@@ -106,24 +121,32 @@ local function toggleLoop()
         status.Text = "Status: 🟢 Running"
         toggleBtn.Text = "Stop"
         toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-        
-        -- Ensure WalkSpeed stays at 35 constantly
-        humanoid.WalkSpeed = WALK_SPEED
 
         task.spawn(function()
             while running do
+                -- enforce WalkSpeed constantly
+                humanoid.WalkSpeed = WALK_SPEED
+
+                -- Collect Christmas World gifts
                 for _, rootPart in ipairs(activations) do
                     if not running then break end
-
-                    -- Teleport to center of the root
-                    hrp.CFrame = CFrame.new(rootPart.Position)
-
-                    -- Give game time to play door animation & reward
-                    task.wait(DELAY_BETWEEN + POST_TELEPORT_BUFFER)
-                    
-                    -- Reapply WalkSpeed in case it was changed
-                    humanoid.WalkSpeed = WALK_SPEED
+                    if rootPart and rootPart.Parent then
+                        hrp.CFrame = CFrame.new(rootPart.Position)
+                        task.wait(DELAY_BETWEEN + 1.5) -- allow animation/reward
+                        humanoid.WalkSpeed = WALK_SPEED
+                    end
                 end
+
+                -- Collect PresentRain gifts
+                for _, present in ipairs(presents) do
+                    if not running then break end
+                    if present and present.Parent then
+                        hrp.CFrame = CFrame.new(present.Position)
+                        task.wait(1.5) -- allow pickup
+                        humanoid.WalkSpeed = WALK_SPEED
+                    end
+                end
+
                 task.wait(0.1)
             end
         end)
@@ -136,7 +159,7 @@ end
 
 toggleBtn.MouseButton1Click:Connect(toggleLoop)
 
--- Keybind changer
+--// Keybind changer
 local waitingForKey = false
 keybindBtn.MouseButton1Click:Connect(function()
     waitingForKey = true
