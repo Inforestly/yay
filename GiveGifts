@@ -4,32 +4,19 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local hrp, humanoid
 
--- Function to get current character and components
 local function getChar()
     character = player.Character or player.CharacterAdded:Wait()
-    hrp = character:WaitForChild("HumanoidRootPart")
-    humanoid = character:WaitForChild("Humanoid")
-    return character, hrp, humanoid
+    return character, character:WaitForChild("HumanoidRootPart"), character:WaitForChild("Humanoid")
 end
 
-getChar()
+local char, hrp, humanoid = getChar()
 
--- Automatically update references on respawn
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    hrp = newChar:WaitForChild("HumanoidRootPart")
-    humanoid = newChar:WaitForChild("Humanoid")
-end)
-
--- Config
 local DELAY_BETWEEN = 3
 local WALK_SPEED = 35
 local DEFAULT_KEY = Enum.KeyCode.RightShift
 local currentKeybind = DEFAULT_KEY
 
--- GUI Setup
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'TeleportGUI'
 screenGui.ResetOnSpawn = false
@@ -43,6 +30,7 @@ frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
+
 Instance.new('UICorner', frame).CornerRadius = UDim.new(0, 14)
 
 local toggleBtn = Instance.new('TextButton')
@@ -55,6 +43,7 @@ toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleBtn.Text = "Start"
 toggleBtn.TextScaled = true
 toggleBtn.Parent = frame
+
 Instance.new('UICorner', toggleBtn).CornerRadius = UDim.new(0, 14)
 
 local keybindBtn = Instance.new('TextButton')
@@ -80,20 +69,21 @@ status.TextScaled = true
 status.TextWrapped = true
 status.Parent = frame
 
--- Teleport targets
+UIS.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == currentKeybind then
+        frame.Visible = not frame.Visible
+    end
+end)
+
 local housesFolder = workspace:WaitForChild("Worlds"):WaitForChild("Christmas World"):WaitForChild("GiveGifts")
 local activations = {}
 
-local function refreshActivations()
-    activations = {}
-    for _, obj in ipairs(housesFolder:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.Name == "Root" and obj.Parent and obj.Parent.Name == "Activation" then
-            table.insert(activations, obj)
-        end
+for _, obj in ipairs(housesFolder:GetDescendants()) do
+    if obj:IsA("BasePart") and obj.Name == "Root" and obj.Parent and obj.Parent.Name == "Activation" then
+        table.insert(activations, obj)
     end
 end
 
--- Loop logic
 local running = false
 local waitingForKey = false
 
@@ -106,14 +96,13 @@ local function startLoop()
     task.spawn(function()
         while running do
             local ok, err = pcall(function()
-                getChar()
+                char, hrp, humanoid = getChar()
                 humanoid.WalkSpeed = WALK_SPEED
-                refreshActivations()
 
                 for _, rootPart in ipairs(activations) do
                     if not running then break end
                     if rootPart and rootPart.Parent then
-                        character:PivotTo(CFrame.new(rootPart.Position))
+                        hrp.CFrame = CFrame.new(rootPart.Position)
 
                         local timer = 0
                         while running and timer < DELAY_BETWEEN do
@@ -146,24 +135,15 @@ end
 
 toggleBtn.MouseButton1Click:Connect(toggleLoop)
 
--- Unified input handler
-UIS.InputBegan:Connect(function(input, gp)
-    if not gp then
-        -- Toggle GUI visibility
-        if input.KeyCode == currentKeybind then
-            frame.Visible = not frame.Visible
-        end
-
-        -- Change keybind
-        if waitingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
-            waitingForKey = false
-            currentKeybind = input.KeyCode
-            keybindBtn.Text = "Change Keybind ("..currentKeybind.Name..")"
-        end
-    end
-end)
-
 keybindBtn.MouseButton1Click:Connect(function()
     waitingForKey = true
     keybindBtn.Text = "Press any key..."
+end)
+
+UIS.InputBegan:Connect(function(input, gp)
+    if waitingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
+        waitingForKey = false
+        currentKeybind = input.KeyCode
+        keybindBtn.Text = "Change Keybind ("..currentKeybind.Name..")"
+    end
 end)
