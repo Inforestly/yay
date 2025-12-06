@@ -71,7 +71,7 @@ local keyCorner = Instance.new('UICorner')
 keyCorner.CornerRadius = UDim.new(0, 12)
 keyCorner.Parent = keybindBtn
 
--- Status label (centered below Start button)
+-- Status label
 local status = Instance.new('TextLabel')
 status.Size = UDim2.new(0.8, 0, 0, 30)
 status.Position = UDim2.new(0.1, 0, 0.70, 0)
@@ -86,7 +86,7 @@ status.TextXAlignment = Enum.TextXAlignment.Center
 status.TextYAlignment = Enum.TextYAlignment.Center
 status.Parent = frame
 
---// Toggle GUI visibility with keybind
+--// Toggle GUI visibility
 UIS.InputBegan:Connect(function(input, gp)
     if not gp and input.KeyCode == currentKeybind then
         frame.Visible = not frame.Visible
@@ -124,7 +124,6 @@ local function toggleLoop()
 
         task.spawn(function()
             while running do
-                -- enforce WalkSpeed constantly
                 humanoid.WalkSpeed = WALK_SPEED
 
                 -- Collect Christmas World gifts
@@ -132,8 +131,12 @@ local function toggleLoop()
                     if not running then break end
                     if rootPart and rootPart.Parent then
                         hrp.CFrame = CFrame.new(rootPart.Position)
-                        task.wait(DELAY_BETWEEN + 1.5) -- allow animation/reward
-                        humanoid.WalkSpeed = WALK_SPEED
+                        local waitTime = 0
+                        repeat
+                            task.wait(0.1)
+                            humanoid.WalkSpeed = WALK_SPEED
+                            waitTime += 0.1
+                        until waitTime >= DELAY_BETWEEN + 1.5 or not running
                     end
                 end
 
@@ -142,8 +145,12 @@ local function toggleLoop()
                     if not running then break end
                     if present and present.Parent then
                         hrp.CFrame = CFrame.new(present.Position)
-                        task.wait(1.5) -- allow pickup
-                        humanoid.WalkSpeed = WALK_SPEED
+                        local waitTime = 0
+                        repeat
+                            task.wait(0.1)
+                            humanoid.WalkSpeed = WALK_SPEED
+                            waitTime += 0.1
+                        until waitTime >= 1.5 or not running
                     end
                 end
 
