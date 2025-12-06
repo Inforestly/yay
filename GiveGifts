@@ -10,6 +10,7 @@ local DELAY_BETWEEN = 3
 local WALK_SPEED = 35
 local DEFAULT_KEY = Enum.KeyCode.RightShift
 local currentKeybind = DEFAULT_KEY
+local COLLECT_DISTANCE = 5 -- distance to "collect" PresentRain parts
 
 --// GUI
 local screenGui = Instance.new('ScreenGui')
@@ -17,7 +18,6 @@ screenGui.Name = 'TeleportGUI'
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild('PlayerGui')
 
--- Background frame
 local frame = Instance.new('Frame')
 frame.Size = UDim2.new(0, 250, 0, 180)
 frame.Position = UDim2.new(0.5, -125, 0.4, -90)
@@ -102,12 +102,14 @@ for _, obj in ipairs(housesFolder:GetDescendants()) do
     end
 end
 
---// Find PresentRain parts
+--// PresentRain folder
 local presentRainFolder = workspace:WaitForChild("Rendered"):WaitForChild("PresentRain")
-local presents = {}
-for _, obj in ipairs(presentRainFolder:GetDescendants()) do
-    if obj:IsA("BasePart") then
-        table.insert(presents, obj)
+
+-- Function to collect a PresentRain part
+local function collectPart(part)
+    if part and part:IsA("BasePart") then
+        hrp.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+        task.wait(0.1)
     end
 end
 
@@ -141,16 +143,17 @@ local function toggleLoop()
                 end
 
                 -- Collect PresentRain gifts
-                for _, present in ipairs(presents) do
+                for _, obj in pairs(presentRainFolder:GetChildren()) do
                     if not running then break end
-                    if present and present.Parent then
-                        hrp.CFrame = CFrame.new(present.Position)
-                        local waitTime = 0
-                        repeat
-                            task.wait(0.1)
+                    if obj:IsA("Model") then
+                        for _, part in pairs(obj:GetDescendants()) do
+                            if not running then break end
+                            collectPart(part)
                             humanoid.WalkSpeed = WALK_SPEED
-                            waitTime += 0.1
-                        until waitTime >= 1.5 or not running
+                        end
+                    elseif obj:IsA("BasePart") then
+                        collectPart(obj)
+                        humanoid.WalkSpeed = WALK_SPEED
                     end
                 end
 
