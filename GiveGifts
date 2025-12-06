@@ -1,16 +1,35 @@
 local Players = game:GetService('Players')
 local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local hrp = character:WaitForChild('HumanoidRootPart')
-local humanoid = character:WaitForChild('Humanoid')
+local hrp, humanoid
 
+-- Function to get current character and components
+local function getChar()
+    character = player.Character or player.CharacterAdded:Wait()
+    hrp = character:WaitForChild("HumanoidRootPart")
+    humanoid = character:WaitForChild("Humanoid")
+    return character, hrp, humanoid
+end
+
+getChar()
+
+-- Automatically update references on respawn
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    hrp = newChar:WaitForChild("HumanoidRootPart")
+    humanoid = newChar:WaitForChild("Humanoid")
+end)
+
+-- Config
 local DELAY_BETWEEN = 3
 local WALK_SPEED = 35
 local DEFAULT_KEY = Enum.KeyCode.RightShift
 local currentKeybind = DEFAULT_KEY
-local COLLECT_DISTANCE = 5 
 
+-- GUI Setup
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'TeleportGUI'
 screenGui.ResetOnSpawn = false
@@ -19,23 +38,12 @@ screenGui.Parent = player:WaitForChild('PlayerGui')
 local frame = Instance.new('Frame')
 frame.Size = UDim2.new(0, 250, 0, 180)
 frame.Position = UDim2.new(0.5, -125, 0.4, -90)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 45)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
-
-local frameCorner = Instance.new('UICorner')
-frameCorner.CornerRadius = UDim.new(0, 14)
-frameCorner.Parent = frame
-
-local frameGradient = Instance.new('UIGradient')
-frameGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 70)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 45))
-}
-frameGradient.Rotation = 45
-frameGradient.Parent = frame
+Instance.new('UICorner', frame).CornerRadius = UDim.new(0, 14)
 
 local toggleBtn = Instance.new('TextButton')
 toggleBtn.Size = UDim2.new(0.8, 0, 0, 50)
@@ -47,10 +55,7 @@ toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleBtn.Text = "Start"
 toggleBtn.TextScaled = true
 toggleBtn.Parent = frame
-
-local toggleCorner = Instance.new('UICorner')
-toggleCorner.CornerRadius = UDim.new(0, 14)
-toggleCorner.Parent = toggleBtn
+Instance.new('UICorner', toggleBtn).CornerRadius = UDim.new(0, 14)
 
 local keybindBtn = Instance.new('TextButton')
 keybindBtn.Size = UDim2.new(0.8, 0, 0, 35)
@@ -63,10 +68,6 @@ keybindBtn.Text = "Change Keybind ("..currentKeybind.Name..")"
 keybindBtn.TextScaled = true
 keybindBtn.Parent = frame
 
-local keyCorner = Instance.new('UICorner')
-keyCorner.CornerRadius = UDim.new(0, 12)
-keyCorner.Parent = keybindBtn
-
 local status = Instance.new('TextLabel')
 status.Size = UDim2.new(0.8, 0, 0, 30)
 status.Position = UDim2.new(0.1, 0, 0.70, 0)
@@ -77,90 +78,92 @@ status.TextColor3 = Color3.fromRGB(255, 255, 255)
 status.Text = "Status: 🟠 Idle"
 status.TextScaled = true
 status.TextWrapped = true
-status.TextXAlignment = Enum.TextXAlignment.Center
-status.TextYAlignment = Enum.TextYAlignment.Center
 status.Parent = frame
 
-UIS.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == currentKeybind then
-        frame.Visible = not frame.Visible
-    end
-end)
-
+-- Teleport targets
 local housesFolder = workspace:WaitForChild("Worlds"):WaitForChild("Christmas World"):WaitForChild("GiveGifts")
 local activations = {}
-for _, obj in ipairs(housesFolder:GetDescendants()) do
-    if obj:IsA("BasePart") and obj.Name == "Root" and obj.Parent and obj.Parent.Name == "Activation" then
-        table.insert(activations, obj)
+
+local function refreshActivations()
+    activations = {}
+    for _, obj in ipairs(housesFolder:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name == "Root" and obj.Parent and obj.Parent.Name == "Activation" then
+            table.insert(activations, obj)
+        end
     end
 end
 
-
+-- Loop logic
 local running = false
+local waitingForKey = false
 
-local function toggleLoop()
-    running = not running
+local function startLoop()
+    running = true
+    status.Text = "Status: 🟢 Running"
+    toggleBtn.Text = "Stop"
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 
-    if running then
-        status.Text = "Status: 🟢 Running"
-        toggleBtn.Text = "Stop"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-
-        task.spawn(function()
-            while running do
+    task.spawn(function()
+        while running do
+            local ok, err = pcall(function()
+                getChar()
                 humanoid.WalkSpeed = WALK_SPEED
+                refreshActivations()
 
                 for _, rootPart in ipairs(activations) do
                     if not running then break end
                     if rootPart and rootPart.Parent then
-                        hrp.CFrame = CFrame.new(rootPart.Position)
-                        local waitTime = 0
-                        repeat
-                            task.wait(0.1)
-                            humanoid.WalkSpeed = WALK_SPEED
-                            waitTime += 0.1
-                        until waitTime >= DELAY_BETWEEN + 1.5 or not running
-                    end
-                end
+                        character:PivotTo(CFrame.new(rootPart.Position))
 
-                for _, obj in pairs(presentRainFolder:GetChildren()) do
-                    if not running then break end
-                    if obj:IsA("Model") then
-                        for _, part in pairs(obj:GetDescendants()) do
-                            if not running then break end
-                            collectPart(part)
+                        local timer = 0
+                        while running and timer < DELAY_BETWEEN do
                             humanoid.WalkSpeed = WALK_SPEED
+                            timer += RunService.Heartbeat:Wait()
                         end
-                    elseif obj:IsA("BasePart") then
-                        collectPart(obj)
-                        humanoid.WalkSpeed = WALK_SPEED
                     end
                 end
+            end)
 
-                task.wait(0.1)
+            if not ok then
+                warn("Loop error:", err)
             end
-        end)
-    else
-        status.Text = "Status: 🟠 Idle"
-        toggleBtn.Text = "Start"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    end
+
+            RunService.Heartbeat:Wait()
+        end
+    end)
+end
+
+local function stopLoop()
+    running = false
+    status.Text = "Status: 🟠 Idle"
+    toggleBtn.Text = "Start"
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+end
+
+local function toggleLoop()
+    if running then stopLoop() else startLoop() end
 end
 
 toggleBtn.MouseButton1Click:Connect(toggleLoop)
 
-local waitingForKey = false
-keybindBtn.MouseButton1Click:Connect(function()
-    waitingForKey = true
-    keybindBtn.Text = "Press any key..."
-end)
-
+-- Unified input handler
 UIS.InputBegan:Connect(function(input, gp)
-    if waitingForKey then
-        if input.KeyCode ~= Enum.KeyCode.Unknown then
-            currentKeybind = input.KeyCode
+    if not gp then
+        -- Toggle GUI visibility
+        if input.KeyCode == currentKeybind then
+            frame.Visible = not frame.Visible
+        end
+
+        -- Change keybind
+        if waitingForKey and input.KeyCode ~= Enum.KeyCode.Unknown then
             waitingForKey = false
+            currentKeybind = input.KeyCode
             keybindBtn.Text = "Change Keybind ("..currentKeybind.Name..")"
         end
     end
+end)
+
+keybindBtn.MouseButton1Click:Connect(function()
+    waitingForKey = true
+    keybindBtn.Text = "Press any key..."
 end)
