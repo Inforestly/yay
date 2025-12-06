@@ -3,10 +3,12 @@ local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild('HumanoidRootPart')
+local humanoid = character:WaitForChild('Humanoid')
 
-local DELAY_BETWEEN = 3.1
+local DELAY_BETWEEN = 2.1
 local DEFAULT_KEY = Enum.KeyCode.RightShift
 local currentKeybind = DEFAULT_KEY
+local WALK_SPEED = 35
 
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'TeleportGUI'
@@ -26,7 +28,6 @@ local frameCorner = Instance.new('UICorner')
 frameCorner.CornerRadius = UDim.new(0, 14)
 frameCorner.Parent = frame
 
--- Gradient overlay for subtle modern look
 local frameGradient = Instance.new('UIGradient')
 frameGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 70)),
@@ -43,7 +44,7 @@ toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 22
 toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleBtn.Text = "Start"
-toggleBtn.TextScaled = true -- scale text automatically
+toggleBtn.TextScaled = true
 toggleBtn.Parent = frame
 
 local toggleCorner = Instance.new('UICorner')
@@ -58,14 +59,13 @@ keybindBtn.Font = Enum.Font.GothamBold
 keybindBtn.TextSize = 18
 keybindBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 keybindBtn.Text = "Change Keybind ("..currentKeybind.Name..")"
-keybindBtn.TextScaled = true -- scale text to fit
+keybindBtn.TextScaled = true
 keybindBtn.Parent = frame
 
 local keyCorner = Instance.new('UICorner')
 keyCorner.CornerRadius = UDim.new(0, 12)
 keyCorner.Parent = keybindBtn
 
--- Status label (centered below Start button)
 local status = Instance.new('TextLabel')
 status.Size = UDim2.new(0.8, 0, 0, 30)
 status.Position = UDim2.new(0.1, 0, 0.70, 0)
@@ -107,11 +107,15 @@ local function toggleLoop()
 
         task.spawn(function()
             while running do
+                -- enforce WalkSpeed constantly
+                humanoid.WalkSpeed = WALK_SPEED
+
                 for _, rootPart in ipairs(activations) do
                     if not running then break end
                     hrp.CFrame = CFrame.new(rootPart.Position)
                     task.wait(DELAY_BETWEEN)
                 end
+                task.wait(0.1) -- small wait to prevent tight loop
             end
         end)
     else
